@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>文案复制器</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #f6f6f7;
+    color: #111;
+  }
+  .card {
+    max-width: 720px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.08);
+  }
+  h1 {
+    font-size: 24px;
+    margin: 0 0 8px;
+  }
+  .sub {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+  .counter {
+    font-size: 16px;
+    margin: 12px 0;
+    font-weight: 600;
+  }
+  textarea {
+    width: 100%;
+    min-height: 170px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 16px;
+    line-height: 1.45;
+    resize: vertical;
+  }
+  button {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+  .primary {
+    background: #111;
+    color: white;
+  }
+  .secondary {
+    background: #e9e9ec;
+    color: #111;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tip {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #777;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>文案复制器</h1>
+    <div class="sub">每点一次「复制下一条」，就会自动复制下一条文案。适合 iPhone 发 TikTok / 短视频时连续粘贴。</div>
+    <div class="counter" id="counter">准备中...</div>
+    <textarea id="preview" readonly></textarea>
+    <button class="primary" onclick="copyNext()">复制下一条文案</button>
+    <div class="row">
+      <button class="secondary" onclick="prevOne()">上一条</button>
+      <button class="secondary" onclick="resetIndex()">重置到第 1 条</button>
+    </div>
+    <div class="tip">
+      用法：把这个网页文件发到 iPhone，用 Safari 打开。复制成功后，回到 TikTok 文案框长按粘贴。<br>
+      建议 Safari 打开后点「分享」→「添加到主屏幕」，以后就像 App 一样使用。
+    </div>
+  </div>
+
+<script>
+const captions = ["C’est le moment de remplacer tout ce qui te pourrit la vie. Boutique = la bonne adresse. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Tu veux la même sensation que dans la vidéo ? Un clic sur le Boutique et c’est parti. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Plus jamais de galère à la maison grâce au TikTok Boutique. Viens voir. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Ce gadget mérite d’être dans ta cuisine. Boutique, c’est par ici ➡️ #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ne cherche plus, la pépite est sur le Boutique. Clique et adopte-la. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Un seul endroit pour dénicher des trucs qui déchirent : le TikTok Boutique. Vas-y. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "La vidéo ne ment pas : le Boutique t’attend. Fonce découvrir les bonnes affaires. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Stop aux appareils qui te ruinent la vie. Le TikTok Boutique a ce qu’il te faut. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Un clic sur le Boutique et tu changes tout. Allez, ose. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "T’en as plein le dos des produits qui cassent ? Le Boutique t’attend. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La vie est trop courte pour utiliser des trucs pourris. Va voir sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La vidéo ne ment pas : la solution existe. Boutique = clic. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Tu veux la même fin heureuse ? Le Boutique n’attend que toi. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Fini les crises et les explosions. Le TikTok Boutique a la réponse. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "La bonne affaire est sur le Boutique. Un clic et elle est à toi. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Ne rate pas ce genre de pépite. Le Boutique, c’est magique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Ça te parle ? Alors direction le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Arrête de lutter avec du matos pourri. TikTok Boutique = solution. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "C’est le genre de produit qui change la donne. Boutique, je te dis. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La magie du TikTok Boutique, tu veux l’essayer ? Clique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Le bon plan est là, sous tes yeux. Boutique, un clic et c’est bon. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Fais comme dans la vidéo : va sur le Boutique et sois heureux. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Ta maison mérite mieux. Le Boutique a ce qu’il faut. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Pas besoin de chercher loin. Le TikTok Boutique t’attend. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La vidéo a raison : le Boutique va te sauver. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu cherches la pépite ? Elle est sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Un monde sans galère commence par un clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Ce que tu vois, tu peux l’avoir. Boutique, c’est facile. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La bonne idée est sur le Boutique. Va voir. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Plus jamais de scènes comme au début. Le Boutique change tout. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "La solution est à portée de clic. TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Fais confiance à la vidéo, le Boutique a tout prévu. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ce n’est pas de la magie, c’est le TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La vie de rêve commence au Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu as vu le résultat ? Alors qu’est-ce que tu attends ? Boutique ! #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Cliquer sur le Boutique, c’est le premier pas vers une vie plus simple. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Tout ce que tu détestes, le Boutique a la version qui te plaira. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Le Boutique, c’est l’endroit où les problèmes disparaissent. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Inspiré par la vidéo ? Va craquer sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Ce petit truc va te changer la vie. Boutique, je te jure. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "La meilleure décision de ta journée : un clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ne laisse pas une mauvaise machine gâcher ta vie. Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "C’est prouvé par la vidéo : le Boutique a la solution. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu veux la même fin heureuse ? Boutique, un clic. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "La vidéo t’a montré le chemin. Le Boutique est la destination. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Fini les mauvaises surprises. Le TikTok Boutique, c’est la fiabilité. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La pépite du jour est sur le Boutique. Ne la rate pas. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Le Boutique, c’est la clé pour en finir avec les produits pourris. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "La vie sans casse, c’est possible. Rendez-vous sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Tout ce que tu vois dans la vidéo, tu peux l’avoir sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "La solution est plus proche que tu ne le penses. Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La magie du Boutique, c’est que ça marche vraiment. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu as aimé la vidéo ? Alors tu vas adorer le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "La vie est trop courte pour les mauvais appareils. Boutique, vite. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Ce que tu cherches est sur le Boutique. C’est aussi simple que ça. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La vidéo ne t’a pas menti. Le Boutique te veut du bien. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "T’as vu la différence ? Le Boutique te donne accès à tout ça. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Une vie sans prise de tête, ça te dit ? Clique sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Le Boutique, c’est l’arme secrète contre les produits nuls. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Ce que la vidéo te montre, le Boutique te l’offre. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La révolution commence dans ta main. TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Plus jamais de bordel à la maison. Le Boutique a la solution. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "La vidéo a fait sa preuve. À toi de passer à l’action sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Le Boutique, c’est le seul endroit où tu trouves des trucs aussi malins. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Ne passe pas à côté du bonheur. Le Boutique t’attend. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Fini de râler. Maintenant tu sais où aller : TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "La preuve par l’image. Le Boutique, c’est la vie en mieux. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Ce genre d’idée, tu ne les trouves que sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La vie sans embrouille, c’est possible. Le TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "T’en veux encore ? Le Boutique est rempli de pépites. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Le Boutique, c’est la réponse à tous tes problèmes du quotidien. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "La vidéo t’a ouvert les yeux. Maintenant, ouvre le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Le Boutique, c’est l’endroit où tu achètes tranquille. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Ta vie mérite mieux qu’un énième produit qui casse. Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "La solution est simple et elle est sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "C’est le moment de passer au niveau supérieur. TikTok Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "La magie que tu as vue, tu peux l’avoir chez toi. Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Le Boutique, c’est l’allié de ta tranquillité. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Pourquoi souffrir quand le Boutique peut tout arranger ? #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Le Boutique, c’est le nouveau réflexe à avoir. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "La fin des mauvais jours commence par un clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Tu as aimé la transformation ? Le Boutique te la propose. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Le Boutique, c’est la garantie de ne plus jamais être déçu. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Le changement, c’est maintenant. Un clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Ne laisse pas une mauvaise expérience gâcher ta journée. Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Le Boutique, c’est le secret des gens qui vivent sans stress. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Ce que tu veux existe. Et c’est sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La solution de la vidéo, elle est sur le Boutique. Clique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Le Boutique, c’est l’endroit où les problèmes prennent fin. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Tu as vu le potentiel ? Maintenant concrétise-le sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "La vie sans prise de tête, c’est un clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Le Boutique, c’est le pouvoir d’améliorer ton quotidien. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "La vidéo te montre la voie. Le Boutique t’attend. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "C’est le genre de truc qui change la donne. Et c’est sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Le Boutique, c’est la nouvelle façon de consommer malin. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Tu veux la même efficacité que dans la vidéo ? Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La preuve en image ne ment pas. Le Boutique est la solution. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Le Boutique, c’est l’endroit où tout devient plus simple. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Tu as vu le résultat ? Il est à portée de clic sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Le Boutique, c’est la clé pour une vie sans galère. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La vidéo t’a montré l’exemple. Maintenant, suis-le sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Le Boutique, c’est la réponse à tes frustrations quotidiennes. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Tu as été convaincu par la vidéo ? Alors va sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Le Boutique, c’est l’endroit où les bonnes idées deviennent réalité. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Ne cherche plus, la solution est sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La magie que tu as vue, elle t’attend sur le Boutique. #TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles"];
+const total = captions.length;
+
+function getIndex() {
+  let n = parseInt(localStorage.getItem("caption_index") || "0", 10);
+  if (isNaN(n) || n < 0) n = 0;
+  if (n >= total) n = total;
+  return n;
+}
+
+function setIndex(n) {
+  localStorage.setItem("caption_index", String(n));
+  updatePreview();
+}
+
+function updatePreview() {
+  const i = getIndex();
+  const counter = document.getElementById("counter");
+  const preview = document.getElementById("preview");
+  if (i >= total) {
+    counter.textContent = `已到最后：共 ${total} 条，当前没有下一条`;
+    preview.value = "文案已经全部复制完。需要重新开始请点“重置到第 1 条”。";
+  } else {
+    counter.textContent = `下一条：第 ${i + 1} / ${total} 条`;
+    preview.value = captions[i];
+  }
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    const ta = document.getElementById("preview");
+    ta.focus();
+    ta.select();
+    return document.execCommand("copy");
+  }
+}
+
+async function copyNext() {
+  const i = getIndex();
+  if (i >= total) {
+    alert("已经复制完全部文案。");
+    updatePreview();
+    return;
+  }
+  const ok = await copyText(captions[i]);
+  if (ok) {
+    setIndex(i + 1);
+    alert(`已复制第 ${i + 1} 条，可以去粘贴了。`);
+  } else {
+    alert("复制失败，请长按文本框手动复制。");
+  }
+}
+
+function resetIndex() {
+  if (confirm("确定重置到第 1 条吗？")) {
+    setIndex(0);
+  }
+}
+
+function prevOne() {
+  const i = getIndex();
+  setIndex(Math.max(0, i - 1));
+}
+
+updatePreview();
+</script>
+</body>
+</html>
