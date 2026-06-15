@@ -1,160 +1,1014 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>文案复制器</title>
-<style>
-  :root { --bg:#f6f6f7; --card:#fff; --text:#111; --muted:#666; --line:#ddd; --soft:#e9e9ec; --primary:#111; }
-  * { box-sizing:border-box; }
-  body {
-    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
-    margin:0; padding:22px; background:var(--bg); color:var(--text);
-  }
-  .card {
-    max-width:720px; margin:0 auto; background:var(--card); border-radius:18px; padding:22px;
-    box-shadow:0 8px 28px rgba(0,0,0,.08);
-  }
-  h1 { font-size:24px; margin:0 0 8px; }
-  .sub { color:var(--muted); font-size:14px; margin-bottom:16px; line-height:1.5; }
-  .counter { font-size:16px; margin:12px 0; font-weight:700; }
-  textarea {
-    width:100%; min-height:190px; border:1px solid var(--line); border-radius:14px; padding:14px;
-    font-size:16px; line-height:1.45; resize:vertical; background:#fff;
-  }
-  button {
-    width:100%; border:none; border-radius:14px; padding:16px; font-size:18px; font-weight:700;
-    margin-top:12px; cursor:pointer;
-  }
-  .primary { background:var(--primary); color:white; }
-  .secondary { background:var(--soft); color:var(--text); }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .jumpBox { margin-top:16px; padding:14px; border:1px solid #e5e5e8; border-radius:16px; background:#fafafa; }
-  .jumpTitle { font-weight:700; margin-bottom:10px; }
-  .jumpRow { display:grid; grid-template-columns:1fr 112px; gap:10px; align-items:center; }
-  input {
-    width:100%; height:52px; border:1px solid var(--line); border-radius:14px; padding:0 14px;
-    font-size:18px; outline:none;
-  }
-  .jumpBtn { height:52px; padding:0 12px; margin-top:0; font-size:16px; }
-  .status { min-height:22px; margin-top:12px; color:#0a7a35; font-size:14px; font-weight:600; }
-  .tip { margin-top:14px; font-size:13px; color:var(--muted); line-height:1.5; }
-</style>
-</head>
-<body>
-  <div class="card">
-    <h1>文案复制器</h1>
-    <div class="sub">每点一次「复制下一条」，就会自动复制下一条法语文案。没有弹窗，适合连续发布。</div>
-    <div class="counter" id="counter">准备中...</div>
-    <textarea id="preview" readonly></textarea>
-    <button class="primary" onclick="copyNext()">复制下一条文案</button>
-    <div class="row">
-      <button class="secondary" onclick="prevOne()">上一条</button>
-      <button class="secondary" onclick="resetIndex()">重置到第 1 条</button>
-    </div>
-    <div class="jumpBox">
-      <div class="jumpTitle">跳转到指定编号</div>
-      <div class="jumpRow">
-        <input id="jumpInput" type="number" min="1" max="50" placeholder="输入编号，例如 25">
-        <button class="secondary jumpBtn" onclick="jumpTo()">跳转</button>
-      </div>
-      <div class="tip">跳转后不会自动复制，需要再点「复制下一条文案」。</div>
-    </div>
-    <div class="status" id="status"></div>
-    <div class="tip">
-      用法：iPhone Safari 打开后，点「复制下一条文案」，回 TikTok 文案框粘贴。<br>
-      建议 Safari 打开后点「分享」→「添加到主屏幕」，以后就像 App 一样使用。
-    </div>
-  </div>
-<script>
-const captions = ["C’est le moment de remplacer tout ce qui te pourrit la vie. Boutique = la bonne adresse.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Tu veux la même sensation que dans la vidéo ? Un clic sur le Boutique et c’est parti.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Plus jamais de galère à la maison grâce au TikTok Boutique. Viens voir.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Ce gadget mérite d’être dans ta cuisine. Boutique, c’est par ici ➡️#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ne cherche plus, la pépite est sur le Boutique. Clique et adopte-la.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Un seul endroit pour dénicher des trucs qui déchirent : le TikTok Boutique. Vas-y.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "La vidéo ne ment pas : le Boutique t’attend. Fonce découvrir les bonnes affaires.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Stop aux appareils qui te ruinent la vie. Le TikTok Boutique a ce qu’il te faut.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Un clic sur le Boutique et tu changes tout. Allez, ose.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "T’en as plein le dos des produits qui cassent ? Le Boutique t’attend.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La vie est trop courte pour utiliser des trucs pourris. Va voir sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "La vidéo ne ment pas : la solution existe. Boutique = clic.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Tu veux la même fin heureuse ? Le Boutique n’attend que toi.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Fini les crises et les explosions. Le TikTok Boutique a la réponse.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "La bonne affaire est sur le Boutique. Un clic et elle est à toi.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "Ne rate pas ce genre de pépite. Le Boutique, c’est magique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Ça te parle ? Alors direction le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Arrête de lutter avec du matos pourri. TikTok Boutique = solution.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "C’est le genre de produit qui change la donne. Boutique, je te dis.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La magie du TikTok Boutique, tu veux l’essayer ? Clique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Le bon plan est là, sous tes yeux. Boutique, un clic et c’est bon.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Fais comme dans la vidéo : va sur le Boutique et sois heureux.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Ta maison mérite mieux. Le Boutique a ce qu’il faut.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Pas besoin de chercher loin. Le TikTok Boutique t’attend.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La vidéo a raison : le Boutique va te sauver.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu cherches la pépite ? Elle est sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Un monde sans galère commence par un clic sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Ce que tu vois, tu peux l’avoir. Boutique, c’est facile.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La bonne idée est sur le Boutique. Va voir.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Plus jamais de scènes comme au début. Le Boutique change tout.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "La solution est à portée de clic. TikTok Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Fais confiance à la vidéo, le Boutique a tout prévu.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ce n’est pas de la magie, c’est le TikTok Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "La vie de rêve commence au Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu as vu le résultat ? Alors qu’est-ce que tu attends ? Boutique !#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "Cliquer sur le Boutique, c’est le premier pas vers une vie plus simple.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Tout ce que tu détestes, le Boutique a la version qui te plaira.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "Le Boutique, c’est l’endroit où les problèmes disparaissent.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Inspiré par la vidéo ? Va craquer sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "Ce petit truc va te changer la vie. Boutique, je te jure.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "La meilleure décision de ta journée : un clic sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode", "Ne laisse pas une mauvaise machine gâcher ta vie. Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Beaute", "C’est prouvé par la vidéo : le Boutique a la solution.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Sport", "Tu veux la même fin heureuse ? Boutique, un clic.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Shopping", "La vidéo t’a montré le chemin. Le Boutique est la destination.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #BonsPlans", "Fini les mauvaises surprises. Le TikTok Boutique, c’est la fiabilité.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #PasCher", "La pépite du jour est sur le Boutique. Ne la rate pas.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #IdeeShopping", "Le Boutique, c’est la clé pour en finir avec les produits pourris.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Trouvailles", "La vie sans casse, c’est possible. Rendez-vous sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Maison", "Tout ce que tu vois dans la vidéo, tu peux l’avoir sur le Boutique.#TikTokShop #TikTokShopFrance #Boutique #BonPlan #Mode"];
-const total = captions.length;
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Mark 的个人小工具｜文案复制工作台</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #eef1f5;
+        --card: #ffffff;
+        --text: #161719;
+        --muted: #667085;
+        --line: #dfe5ee;
+        --soft: #f6f8fb;
+        --dark: #151719;
+        --dark-panel: #1d232b;
+        --accent: #0f766e;
+        --accent-soft: #dff7f1;
+        --amber: #c97917;
+        --amber-soft: #fff2d6;
+        --note: #fff6df;
+        --note-line: #edcd82;
+        --success: #087f5b;
+        --warning: #b45309;
+        --danger-bg: #fff7ed;
+        --danger-text: #9a3412;
+        --disabled: #c8ced8;
+        --shadow: 0 18px 44px rgba(17, 24, 39, 0.1);
+        --shadow-soft: 0 10px 26px rgba(17, 24, 39, 0.07);
+      }
 
-function getIndex() {
-  let n = parseInt(localStorage.getItem("caption_index") || "0", 10);
-  if (isNaN(n) || n < 0) n = 0;
-  if (n >= total) n = total;
-  return n;
-}
-function setIndex(n) {
-  localStorage.setItem("caption_index", String(n));
-  updatePreview();
-}
-function setStatus(text) {
-  const status = document.getElementById("status");
-  status.textContent = text || "";
-  if (text) {
-    clearTimeout(window.__statusTimer);
-    window.__statusTimer = setTimeout(() => { status.textContent = ""; }, 1200);
-  }
-}
-function updatePreview() {
-  const i = getIndex();
-  const counter = document.getElementById("counter");
-  const preview = document.getElementById("preview");
-  const jumpInput = document.getElementById("jumpInput");
-  jumpInput.max = total;
-  if (i >= total) {
-    counter.textContent = `已到最后：共 ${total} 条，当前没有下一条`;
-    preview.value = "文案已经全部复制完。需要重新开始请点“重置到第 1 条”，或输入编号跳转。";
-  } else {
-    counter.textContent = `下一条：第 ${i + 1} / ${total} 条`;
-    preview.value = captions[i];
-  }
-}
-async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (e) {
-    const ta = document.getElementById("preview");
-    ta.focus();
-    ta.select();
-    return document.execCommand("copy");
-  }
-}
-async function copyNext() {
-  const i = getIndex();
-  if (i >= total) {
-    setStatus("已经复制完全部文案");
-    updatePreview();
-    return;
-  }
-  const ok = await copyText(captions[i]);
-  if (ok) {
-    setIndex(i + 1);
-    setStatus(`已复制第 ${i + 1} 条`);
-  } else {
-    setStatus("复制失败，请长按文本框手动复制");
-  }
-}
-function resetIndex() {
-  setIndex(0);
-  setStatus("已重置到第 1 条");
-}
-function prevOne() {
-  const i = getIndex();
-  setIndex(Math.max(0, i - 1));
-  setStatus("已回到上一条");
-}
-function jumpTo() {
-  const input = document.getElementById("jumpInput");
-  let n = parseInt(input.value, 10);
-  if (isNaN(n)) {
-    setStatus("请输入有效编号");
-    input.focus();
-    return;
-  }
-  if (n < 1) n = 1;
-  if (n > total) n = total;
-  setIndex(n - 1);
-  input.value = "";
-  setStatus(`已跳转到第 ${n} 条`);
-}
-document.getElementById("jumpInput").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") jumpTo();
-});
-updatePreview();
-</script>
-</body>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--bg);
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        min-height: 100vh;
+        min-height: 100svh;
+        margin: 0;
+        background:
+          linear-gradient(180deg, #f8fafc 0%, var(--bg) 46%, #e9edf4 100%);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+
+      button,
+      select {
+        font: inherit;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .app-shell {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: min(100%, 580px);
+        min-height: 100vh;
+        min-height: 100svh;
+        margin: 0 auto;
+        padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+      }
+
+      .top-title {
+        position: relative;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.74);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: var(--shadow-soft);
+        padding: 18px;
+        overflow: hidden;
+      }
+
+      .top-title::after {
+        content: none;
+      }
+
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .brand-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: var(--dark);
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .brand-text {
+        min-width: 0;
+      }
+
+      .brand-text strong {
+        display: block;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+
+      .brand-text span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .private-badge {
+        display: none;
+      }
+
+      .top-title h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.18;
+        font-weight: 850;
+      }
+
+      .tool-name {
+        display: none;
+      }
+
+      .top-title p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .status-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .status-chip {
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.35;
+      }
+
+      .status-chip.is-live {
+        background: var(--accent-soft);
+        color: #075e58;
+      }
+
+      .status-chip.is-lock {
+        background: var(--amber-soft);
+        color: #8a4b08;
+      }
+
+      .status-chip.is-copy {
+        display: none;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.is-active {
+        display: block;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .mode-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .mode-button {
+        position: relative;
+        width: 100%;
+        min-height: 112px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card);
+        color: var(--text);
+        padding: 18px 18px 16px;
+        text-align: left;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .mode-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: var(--accent);
+      }
+
+      .mode-button[data-nav="cart"]::before {
+        background: var(--amber);
+      }
+
+      .mode-button::after {
+        content: none;
+      }
+
+      .mode-button strong {
+        display: block;
+        font-size: 22px;
+        line-height: 1.2;
+      }
+
+      .mode-button span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .mode-meta {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        margin-top: 14px;
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--muted);
+        padding: 0 10px;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 800;
+      }
+
+      .workspace-note {
+        display: none;
+      }
+
+      .page-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .page-head h2 {
+        margin: 0;
+        font-size: 23px;
+        line-height: 1.2;
+      }
+
+      .page-kicker {
+        display: none;
+      }
+
+      .tool-row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .ghost-button,
+      .refresh-button {
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        color: var(--text);
+        padding: 0 14px;
+        font-size: 15px;
+        font-weight: 750;
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
+      }
+
+      .refresh-button {
+        width: 100%;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .stat-card {
+        min-height: 76px;
+        border-radius: 8px;
+        border: 1px solid #e8edf4;
+        background: var(--soft);
+        padding: 12px 8px;
+        text-align: center;
+      }
+
+      .stat-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .stat-card strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 22px;
+        line-height: 1.1;
+      }
+
+      .product-card {
+        margin-top: 12px;
+        border-radius: 8px;
+        background: var(--soft);
+        padding: 12px;
+      }
+
+      .product-card span,
+      .field-label {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .product-card strong {
+        display: block;
+        margin-top: 5px;
+        font-size: 17px;
+        overflow-wrap: anywhere;
+      }
+
+      .field-label {
+        margin-top: 14px;
+      }
+
+      .select-field {
+        width: 100%;
+        min-height: 54px;
+        margin-top: 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--text);
+        padding: 0 14px;
+        font-size: 17px;
+        font-weight: 750;
+      }
+
+      .primary-button {
+        width: 100%;
+        min-height: 60px;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--dark);
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 850;
+        box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18);
+      }
+
+      .primary-button:disabled {
+        background: var(--disabled);
+        color: #f8fafc;
+      }
+
+      .tip {
+        min-height: 24px;
+        margin: 12px 0 0;
+        color: var(--success);
+        font-size: 14px;
+        font-weight: 750;
+        line-height: 1.5;
+      }
+
+      .tip.is-warning {
+        color: var(--warning);
+      }
+
+      .empty-state {
+        display: none;
+        margin-top: 10px;
+        border-radius: 8px;
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .empty-state.is-visible {
+        display: block;
+      }
+
+      .result-area {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .result-area[hidden] {
+        display: none;
+      }
+
+      .copy-panel,
+      .note-panel,
+      .meta-panel {
+        border-radius: 8px;
+        padding: 14px;
+      }
+
+      .copy-panel {
+        background: var(--dark-panel);
+        color: #ffffff;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      }
+
+      .note-panel {
+        border: 1px solid var(--note-line);
+        background: var(--note);
+        color: #4a2d00;
+      }
+
+      .meta-panel {
+        background: var(--soft);
+        color: var(--text);
+      }
+
+      .panel-label {
+        display: block;
+        margin-bottom: 7px;
+        opacity: 0.76;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .copy-panel p,
+      .note-panel p,
+      .meta-panel p {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.65;
+        overflow-wrap: anywhere;
+      }
+
+      .meta-line + .meta-line {
+        margin-top: 8px;
+      }
+
+      .loading {
+        opacity: 0.72;
+        pointer-events: none;
+      }
+
+      @media (min-width: 680px) {
+        .app-shell {
+          padding-right: 20px;
+          padding-left: 20px;
+        }
+
+        .mode-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-height: 720px) {
+        .app-shell {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 390px) {
+        .top-title h1 {
+          font-size: 28px;
+        }
+
+        .status-strip {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="top-title">
+        <div class="brand-row">
+          <div class="brand-left">
+            <div class="brand-mark">M</div>
+            <div class="brand-text">
+              <strong>Mark 的个人小工具</strong>
+              <span>Google Sheets 文案库</span>
+            </div>
+          </div>
+          <div class="private-badge">专属工具</div>
+        </div>
+        <div class="tool-name">文案复制工作台</div>
+        <h1>文案复制工作台</h1>
+        <p>给批量发布视频准备的轻量工作台，只领取、只复制、自动锁定已使用文案。</p>
+        <div class="status-strip" aria-label="工作台状态">
+          <div class="status-chip is-live">实时读取表格</div>
+          <div class="status-chip is-lock">防重复领取</div>
+          <div class="status-chip is-copy">只复制文案</div>
+        </div>
+      </header>
+
+      <section class="view is-active" data-view="home">
+        <div class="mode-grid">
+          <button class="mode-button" type="button" data-nav="daily">
+            <strong>日常发布</strong>
+            <span>领取不挂具体商品的视频文案</span>
+            <em class="mode-meta">Daily captions</em>
+          </button>
+          <button class="mode-button" type="button" data-nav="cart">
+            <strong>挂车发布</strong>
+            <span>按商品领取挂车视频文案</span>
+            <em class="mode-meta">Product captions</em>
+          </button>
+        </div>
+        <p class="workspace-note">领取前不会展示下一条文案，多台手机同时使用时也会由服务端锁定，避免重复领取。</p>
+      </section>
+
+      <section class="view card" data-view="daily">
+        <div class="page-head">
+          <button class="ghost-button" type="button" data-nav="home">返回</button>
+          <h2>日常发布</h2>
+        </div>
+        <p class="page-kicker">从「日常发布」表按排序编号领取第一条未使用文案。</p>
+
+        <div class="tool-row">
+          <button class="refresh-button" type="button" id="dailyRefreshButton">刷新数据</button>
+          <span></span>
+        </div>
+
+        <div class="stats-grid" id="dailyStats"></div>
+
+        <button class="primary-button" type="button" id="dailyClaimButton">领取并复制</button>
+        <p class="tip" id="dailyTip" role="status" aria-live="polite"></p>
+        <div class="empty-state" id="dailyEmpty"></div>
+
+        <article class="result-area" id="dailyResult" hidden>
+          <div class="copy-panel">
+            <span class="panel-label">已领取文案</span>
+            <p id="dailyCopyText"></p>
+          </div>
+          <div class="note-panel">
+            <span class="panel-label">中文注释</span>
+            <p id="dailyCnNote"></p>
+          </div>
+          <div class="meta-panel">
+            <p class="meta-line"><span class="panel-label">语言</span><span id="dailyLanguage"></span></p>
+            <p class="meta-line"><span class="panel-label">使用时间</span><span id="dailyUsedAt"></span></p>
+          </div>
+        </article>
+      </section>
+
+      <section class="view card" data-view="cart">
+        <div class="page-head">
+          <button class="ghost-button" type="button" data-nav="home">返回</button>
+          <h2>挂车发布</h2>
+        </div>
+        <p class="page-kicker">先选择商品，再从该商品下按排序编号领取文案。</p>
+
+        <button class="refresh-button" type="button" id="cartRefreshButton">刷新数据</button>
+
+        <label class="field-label" for="productSelect">请选择商品</label>
+        <select class="select-field" id="productSelect">
+          <option value="">加载中...</option>
+        </select>
+
+        <div class="product-card" id="selectedProductCard" hidden>
+          <span>商品名称</span>
+          <strong id="selectedProductName"></strong>
+        </div>
+
+        <div class="stats-grid" id="cartStats"></div>
+
+        <button class="primary-button" type="button" id="cartClaimButton">领取并复制</button>
+        <p class="tip" id="cartTip" role="status" aria-live="polite"></p>
+        <div class="empty-state" id="cartEmpty"></div>
+
+        <article class="result-area" id="cartResult" hidden>
+          <div class="copy-panel">
+            <span class="panel-label">已领取文案</span>
+            <p id="cartCopyText"></p>
+          </div>
+          <div class="note-panel">
+            <span class="panel-label">中文注释</span>
+            <p id="cartCnNote"></p>
+          </div>
+          <div class="meta-panel">
+            <p class="meta-line"><span class="panel-label">语言</span><span id="cartLanguage"></span></p>
+            <p class="meta-line"><span class="panel-label">使用时间</span><span id="cartUsedAt"></span></p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const state = {
+        view: 'home',
+        dailyStats: { total: 0, used: 0, unused: 0 },
+        cartStats: { productName: '', total: 0, used: 0, unused: 0 },
+        products: [],
+        selectedProduct: '',
+        loading: false,
+      };
+
+      const els = {};
+
+      document.addEventListener('DOMContentLoaded', () => {
+        cacheElements();
+        bindEvents();
+        renderStats(els.dailyStats, state.dailyStats);
+        renderStats(els.cartStats, state.cartStats);
+        setDailyLoading(true);
+        setCartLoading(true);
+        loadDailyStats();
+        loadCartProducts();
+      });
+
+      function cacheElements() {
+        els.views = document.querySelectorAll('.view');
+        els.navButtons = document.querySelectorAll('[data-nav]');
+        els.dailyStats = document.querySelector('#dailyStats');
+        els.cartStats = document.querySelector('#cartStats');
+        els.dailyClaimButton = document.querySelector('#dailyClaimButton');
+        els.cartClaimButton = document.querySelector('#cartClaimButton');
+        els.dailyRefreshButton = document.querySelector('#dailyRefreshButton');
+        els.cartRefreshButton = document.querySelector('#cartRefreshButton');
+        els.dailyTip = document.querySelector('#dailyTip');
+        els.cartTip = document.querySelector('#cartTip');
+        els.dailyEmpty = document.querySelector('#dailyEmpty');
+        els.cartEmpty = document.querySelector('#cartEmpty');
+        els.dailyResult = document.querySelector('#dailyResult');
+        els.cartResult = document.querySelector('#cartResult');
+        els.dailyCopyText = document.querySelector('#dailyCopyText');
+        els.cartCopyText = document.querySelector('#cartCopyText');
+        els.dailyCnNote = document.querySelector('#dailyCnNote');
+        els.cartCnNote = document.querySelector('#cartCnNote');
+        els.dailyLanguage = document.querySelector('#dailyLanguage');
+        els.cartLanguage = document.querySelector('#cartLanguage');
+        els.dailyUsedAt = document.querySelector('#dailyUsedAt');
+        els.cartUsedAt = document.querySelector('#cartUsedAt');
+        els.productSelect = document.querySelector('#productSelect');
+        els.selectedProductCard = document.querySelector('#selectedProductCard');
+        els.selectedProductName = document.querySelector('#selectedProductName');
+      }
+
+      function bindEvents() {
+        els.navButtons.forEach((button) => {
+          button.addEventListener('click', () => showView(button.dataset.nav));
+        });
+
+        els.dailyRefreshButton.addEventListener('click', () => {
+          clearTip(els.dailyTip);
+          loadDailyStats();
+        });
+
+        els.cartRefreshButton.addEventListener('click', () => {
+          clearTip(els.cartTip);
+          loadCartProducts(true);
+        });
+
+        els.dailyClaimButton.addEventListener('click', claimDaily);
+        els.cartClaimButton.addEventListener('click', claimCart);
+
+        els.productSelect.addEventListener('change', () => {
+          state.selectedProduct = els.productSelect.value;
+          clearCartResult();
+          renderSelectedProduct();
+          loadCartStats();
+        });
+      }
+
+      function showView(viewName) {
+        state.view = viewName;
+        els.views.forEach((view) => {
+          view.classList.toggle('is-active', view.dataset.view === viewName);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function loadDailyStats() {
+        setDailyLoading(true);
+        google.script.run
+          .withSuccessHandler((stats) => {
+            state.dailyStats = stats || { total: 0, used: 0, unused: 0 };
+            renderDaily();
+            setDailyLoading(false);
+          })
+          .withFailureHandler((error) => {
+            setDailyLoading(false);
+            showTip(els.dailyTip, getErrorMessage(error), true);
+          })
+          .getDailyStats();
+      }
+
+      function loadCartProducts(keepCurrent) {
+        setCartLoading(true);
+        google.script.run
+          .withSuccessHandler((products) => {
+            state.products = Array.isArray(products) ? products : [];
+
+            if (keepCurrent && state.products.includes(state.selectedProduct)) {
+              renderProductOptions(state.selectedProduct);
+            } else {
+              state.selectedProduct = state.products[0] || '';
+              renderProductOptions(state.selectedProduct);
+            }
+
+            renderSelectedProduct();
+            loadCartStats();
+          })
+          .withFailureHandler((error) => {
+            setCartLoading(false);
+            showTip(els.cartTip, getErrorMessage(error), true);
+          })
+          .getCartProducts();
+      }
+
+      function loadCartStats() {
+        if (!state.selectedProduct) {
+          state.cartStats = { productName: '', total: 0, used: 0, unused: 0 };
+          renderCart();
+          setCartLoading(false);
+          return;
+        }
+
+        setCartLoading(true);
+        google.script.run
+          .withSuccessHandler((stats) => {
+            state.cartStats = stats || { productName: state.selectedProduct, total: 0, used: 0, unused: 0 };
+            renderCart();
+            setCartLoading(false);
+          })
+          .withFailureHandler((error) => {
+            setCartLoading(false);
+            showTip(els.cartTip, getErrorMessage(error), true);
+          })
+          .getCartStats(state.selectedProduct);
+      }
+
+      function claimDaily() {
+        setDailyLoading(true);
+        clearTip(els.dailyTip);
+
+        google.script.run
+          .withSuccessHandler(async (result) => {
+            if (!result || !result.success) {
+              showNoAvailable(els.dailyEmpty, result && result.message
+                ? result.message
+                : '当前没有可用文案，请在 Google Sheets「日常发布」表中新增文案。');
+              clearDailyResult();
+              loadDailyStats();
+              return;
+            }
+
+            await showClaimResult({
+              result,
+              tipEl: els.dailyTip,
+              resultEl: els.dailyResult,
+              copyTextEl: els.dailyCopyText,
+              cnNoteEl: els.dailyCnNote,
+              languageEl: els.dailyLanguage,
+              usedAtEl: els.dailyUsedAt,
+            });
+            loadDailyStats();
+          })
+          .withFailureHandler((error) => {
+            setDailyLoading(false);
+            showTip(els.dailyTip, getErrorMessage(error), true);
+          })
+          .claimDailyCaption();
+      }
+
+      function claimCart() {
+        if (!state.selectedProduct) {
+          showTip(els.cartTip, '请先选择商品。', true);
+          return;
+        }
+
+        setCartLoading(true);
+        clearTip(els.cartTip);
+
+        google.script.run
+          .withSuccessHandler(async (result) => {
+            if (!result || !result.success) {
+              showNoAvailable(els.cartEmpty, result && result.message
+                ? result.message
+                : '当前商品没有可用文案，请在 Google Sheets「挂车发布」表中为该商品新增文案。');
+              clearCartResult();
+              loadCartStats();
+              return;
+            }
+
+            await showClaimResult({
+              result,
+              tipEl: els.cartTip,
+              resultEl: els.cartResult,
+              copyTextEl: els.cartCopyText,
+              cnNoteEl: els.cartCnNote,
+              languageEl: els.cartLanguage,
+              usedAtEl: els.cartUsedAt,
+            });
+            loadCartStats();
+          })
+          .withFailureHandler((error) => {
+            setCartLoading(false);
+            showTip(els.cartTip, getErrorMessage(error), true);
+          })
+          .claimCartCaption(state.selectedProduct);
+      }
+
+      async function showClaimResult(options) {
+        const copied = await copyText(options.result.copyText || '');
+
+        options.copyTextEl.textContent = options.result.copyText || '';
+        options.cnNoteEl.textContent = options.result.cnNote || '';
+        options.languageEl.textContent = options.result.language || '';
+        options.usedAtEl.textContent = options.result.usedAt || '';
+        options.resultEl.hidden = false;
+
+        showTip(
+          options.tipEl,
+          copied ? '已领取并复制' : '自动复制失败，请手动长按复制下方文案。',
+          !copied
+        );
+      }
+
+      async function copyText(text) {
+        if (!text) {
+          return false;
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (error) {
+            return fallbackCopy(text);
+          }
+        }
+
+        return fallbackCopy(text);
+      }
+
+      function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-999px';
+        textarea.style.left = '-999px';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+
+        let copied = false;
+
+        try {
+          copied = document.execCommand('copy');
+        } catch (error) {
+          copied = false;
+        }
+
+        textarea.remove();
+        return copied;
+      }
+
+      function renderDaily() {
+        renderStats(els.dailyStats, state.dailyStats);
+        els.dailyClaimButton.disabled = state.loading || state.dailyStats.unused === 0;
+        showNoAvailable(
+          els.dailyEmpty,
+          state.dailyStats.unused === 0
+            ? '当前没有可用文案，请在 Google Sheets「日常发布」表中新增文案。'
+            : ''
+        );
+      }
+
+      function renderCart() {
+        renderStats(els.cartStats, state.cartStats);
+        els.cartClaimButton.disabled = state.loading || !state.selectedProduct || state.cartStats.unused === 0;
+        showNoAvailable(
+          els.cartEmpty,
+          state.selectedProduct && state.cartStats.unused === 0
+            ? '当前商品没有可用文案，请在 Google Sheets「挂车发布」表中为该商品新增文案。'
+            : ''
+        );
+      }
+
+      function renderStats(container, stats) {
+        const safeStats = stats || { total: 0, used: 0, unused: 0 };
+        container.innerHTML = [
+          { label: '总文案', value: `${safeStats.total || 0} 条` },
+          { label: '已使用', value: `${safeStats.used || 0} 条` },
+          { label: '剩余', value: `${safeStats.unused || 0} 条` },
+        ].map((item) => `
+          <div class="stat-card">
+            <span>${item.label}</span>
+            <strong>${item.value}</strong>
+          </div>
+        `).join('');
+      }
+
+      function renderProductOptions(selectedValue) {
+        const options = state.products.map((product) => (
+          `<option value="${escapeHtml(product)}">${escapeHtml(product)}</option>`
+        ));
+
+        els.productSelect.innerHTML = options.length
+          ? options.join('')
+          : '<option value="">暂无商品</option>';
+
+        els.productSelect.value = selectedValue || '';
+      }
+
+      function renderSelectedProduct() {
+        const hasProduct = Boolean(state.selectedProduct);
+        els.selectedProductCard.hidden = !hasProduct;
+        els.selectedProductName.textContent = state.selectedProduct;
+      }
+
+      function setDailyLoading(isLoading) {
+        state.loading = isLoading;
+        els.dailyClaimButton.disabled = isLoading || state.dailyStats.unused === 0;
+        els.dailyRefreshButton.disabled = isLoading;
+      }
+
+      function setCartLoading(isLoading) {
+        state.loading = isLoading;
+        els.cartClaimButton.disabled = isLoading || !state.selectedProduct || state.cartStats.unused === 0;
+        els.cartRefreshButton.disabled = isLoading;
+        els.productSelect.disabled = isLoading;
+      }
+
+      function showNoAvailable(element, message) {
+        element.textContent = message || '';
+        element.classList.toggle('is-visible', Boolean(message));
+      }
+
+      function showTip(element, message, isWarning) {
+        element.textContent = message || '';
+        element.classList.toggle('is-warning', Boolean(isWarning));
+      }
+
+      function clearTip(element) {
+        showTip(element, '', false);
+      }
+
+      function clearDailyResult() {
+        els.dailyResult.hidden = true;
+        els.dailyCopyText.textContent = '';
+        els.dailyCnNote.textContent = '';
+        els.dailyLanguage.textContent = '';
+        els.dailyUsedAt.textContent = '';
+      }
+
+      function clearCartResult() {
+        clearTip(els.cartTip);
+        els.cartResult.hidden = true;
+        els.cartCopyText.textContent = '';
+        els.cartCnNote.textContent = '';
+        els.cartLanguage.textContent = '';
+        els.cartUsedAt.textContent = '';
+      }
+
+      function getErrorMessage(error) {
+        return error && error.message ? error.message : '读取失败，请稍后重试。';
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+    </script>
+  </body>
 </html>
