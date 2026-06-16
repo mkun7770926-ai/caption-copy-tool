@@ -1,1014 +1,483 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <base target="_top">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Mark 的个人小工具｜文案复制工作台</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #eef1f5;
-        --card: #ffffff;
-        --text: #161719;
-        --muted: #667085;
-        --line: #dfe5ee;
-        --soft: #f6f8fb;
-        --dark: #151719;
-        --dark-panel: #1d232b;
-        --accent: #0f766e;
-        --accent-soft: #dff7f1;
-        --amber: #c97917;
-        --amber-soft: #fff2d6;
-        --note: #fff6df;
-        --note-line: #edcd82;
-        --success: #087f5b;
-        --warning: #b45309;
-        --danger-bg: #fff7ed;
-        --danger-text: #9a3412;
-        --disabled: #c8ced8;
-        --shadow: 0 18px 44px rgba(17, 24, 39, 0.1);
-        --shadow-soft: 0 10px 26px rgba(17, 24, 39, 0.07);
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html {
-        min-height: 100%;
-        background: var(--bg);
-        -webkit-text-size-adjust: 100%;
-      }
-
-      body {
-        min-height: 100vh;
-        min-height: 100svh;
-        margin: 0;
-        background:
-          linear-gradient(180deg, #f8fafc 0%, var(--bg) 46%, #e9edf4 100%);
-        color: var(--text);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-        letter-spacing: 0;
-      }
-
-      button,
-      select {
-        font: inherit;
-      }
-
-      button {
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .app-shell {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: min(100%, 580px);
-        min-height: 100vh;
-        min-height: 100svh;
-        margin: 0 auto;
-        padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
-      }
-
-      .top-title {
-        position: relative;
-        margin-bottom: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.74);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.82);
-        box-shadow: var(--shadow-soft);
-        padding: 18px;
-        overflow: hidden;
-      }
-
-      .top-title::after {
-        content: none;
-      }
-
-      .brand-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-
-      .brand-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .brand-mark {
-        display: grid;
-        place-items: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 8px;
-        background: var(--dark);
-        color: #ffffff;
-        font-size: 20px;
-        font-weight: 900;
-      }
-
-      .brand-text {
-        min-width: 0;
-      }
-
-      .brand-text strong {
-        display: block;
-        font-size: 15px;
-        line-height: 1.2;
-      }
-
-      .brand-text span {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 750;
-      }
-
-      .private-badge {
-        display: none;
-      }
-
-      .top-title h1 {
-        margin: 0;
-        font-size: 30px;
-        line-height: 1.18;
-        font-weight: 850;
-      }
-
-      .tool-name {
-        display: none;
-      }
-
-      .top-title p {
-        margin: 8px 0 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.55;
-      }
-
-      .status-strip {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-top: 14px;
-      }
-
-      .status-chip {
-        border-radius: 8px;
-        padding: 10px;
-        font-size: 12px;
-        font-weight: 800;
-        line-height: 1.35;
-      }
-
-      .status-chip.is-live {
-        background: var(--accent-soft);
-        color: #075e58;
-      }
-
-      .status-chip.is-lock {
-        background: var(--amber-soft);
-        color: #8a4b08;
-      }
-
-      .status-chip.is-copy {
-        display: none;
-      }
-
-      .view {
-        display: none;
-      }
-
-      .view.is-active {
-        display: block;
-      }
-
-      .card {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--card);
-        box-shadow: var(--shadow);
-        padding: 18px;
-      }
-
-      .mode-grid {
-        display: grid;
-        gap: 12px;
-      }
-
-      .mode-button {
-        position: relative;
-        width: 100%;
-        min-height: 112px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--card);
-        color: var(--text);
-        padding: 18px 18px 16px;
-        text-align: left;
-        box-shadow: var(--shadow);
-        overflow: hidden;
-      }
-
-      .mode-button::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        height: 4px;
-        background: var(--accent);
-      }
-
-      .mode-button[data-nav="cart"]::before {
-        background: var(--amber);
-      }
-
-      .mode-button::after {
-        content: none;
-      }
-
-      .mode-button strong {
-        display: block;
-        font-size: 22px;
-        line-height: 1.2;
-      }
-
-      .mode-button span {
-        display: block;
-        margin-top: 8px;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.45;
-      }
-
-      .mode-meta {
-        display: inline-flex;
-        align-items: center;
-        min-height: 28px;
-        margin-top: 14px;
-        border-radius: 8px;
-        background: var(--soft);
-        color: var(--muted);
-        padding: 0 10px;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 800;
-      }
-
-      .workspace-note {
-        display: none;
-      }
-
-      .page-head {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 16px;
-      }
-
-      .page-head h2 {
-        margin: 0;
-        font-size: 23px;
-        line-height: 1.2;
-      }
-
-      .page-kicker {
-        display: none;
-      }
-
-      .tool-row {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .ghost-button,
-      .refresh-button {
-        min-height: 44px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: #ffffff;
-        color: var(--text);
-        padding: 0 14px;
-        font-size: 15px;
-        font-weight: 750;
-        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
-      }
-
-      .refresh-button {
-        width: 100%;
-      }
-
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        margin-top: 14px;
-      }
-
-      .stat-card {
-        min-height: 76px;
-        border-radius: 8px;
-        border: 1px solid #e8edf4;
-        background: var(--soft);
-        padding: 12px 8px;
-        text-align: center;
-      }
-
-      .stat-card span {
-        display: block;
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 750;
-      }
-
-      .stat-card strong {
-        display: block;
-        margin-top: 8px;
-        font-size: 22px;
-        line-height: 1.1;
-      }
-
-      .product-card {
-        margin-top: 12px;
-        border-radius: 8px;
-        background: var(--soft);
-        padding: 12px;
-      }
-
-      .product-card span,
-      .field-label {
-        display: block;
-        color: var(--muted);
-        font-size: 13px;
-        font-weight: 800;
-      }
-
-      .product-card strong {
-        display: block;
-        margin-top: 5px;
-        font-size: 17px;
-        overflow-wrap: anywhere;
-      }
-
-      .field-label {
-        margin-top: 14px;
-      }
-
-      .select-field {
-        width: 100%;
-        min-height: 54px;
-        margin-top: 8px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--soft);
-        color: var(--text);
-        padding: 0 14px;
-        font-size: 17px;
-        font-weight: 750;
-      }
-
-      .primary-button {
-        width: 100%;
-        min-height: 60px;
-        margin-top: 16px;
-        border: 0;
-        border-radius: 8px;
-        background: var(--dark);
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: 850;
-        box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18);
-      }
-
-      .primary-button:disabled {
-        background: var(--disabled);
-        color: #f8fafc;
-      }
-
-      .tip {
-        min-height: 24px;
-        margin: 12px 0 0;
-        color: var(--success);
-        font-size: 14px;
-        font-weight: 750;
-        line-height: 1.5;
-      }
-
-      .tip.is-warning {
-        color: var(--warning);
-      }
-
-      .empty-state {
-        display: none;
-        margin-top: 10px;
-        border-radius: 8px;
-        background: var(--danger-bg);
-        color: var(--danger-text);
-        padding: 12px;
-        font-size: 14px;
-        line-height: 1.55;
-      }
-
-      .empty-state.is-visible {
-        display: block;
-      }
-
-      .result-area {
-        display: grid;
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      .result-area[hidden] {
-        display: none;
-      }
-
-      .copy-panel,
-      .note-panel,
-      .meta-panel {
-        border-radius: 8px;
-        padding: 14px;
-      }
-
-      .copy-panel {
-        background: var(--dark-panel);
-        color: #ffffff;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-      }
-
-      .note-panel {
-        border: 1px solid var(--note-line);
-        background: var(--note);
-        color: #4a2d00;
-      }
-
-      .meta-panel {
-        background: var(--soft);
-        color: var(--text);
-      }
-
-      .panel-label {
-        display: block;
-        margin-bottom: 7px;
-        opacity: 0.76;
-        font-size: 12px;
-        font-weight: 850;
-      }
-
-      .copy-panel p,
-      .note-panel p,
-      .meta-panel p {
-        margin: 0;
-        font-size: 16px;
-        line-height: 1.65;
-        overflow-wrap: anywhere;
-      }
-
-      .meta-line + .meta-line {
-        margin-top: 8px;
-      }
-
-      .loading {
-        opacity: 0.72;
-        pointer-events: none;
-      }
-
-      @media (min-width: 680px) {
-        .app-shell {
-          padding-right: 20px;
-          padding-left: 20px;
-        }
-
-        .mode-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      @media (max-height: 720px) {
-        .app-shell {
-          justify-content: flex-start;
-        }
-      }
-
-      @media (max-width: 390px) {
-        .top-title h1 {
-          font-size: 28px;
-        }
-
-        .status-strip {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="app-shell">
-      <header class="top-title">
-        <div class="brand-row">
-          <div class="brand-left">
-            <div class="brand-mark">M</div>
-            <div class="brand-text">
-              <strong>Mark 的个人小工具</strong>
-              <span>Google Sheets 文案库</span>
-            </div>
-          </div>
-          <div class="private-badge">专属工具</div>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="文案复制器">
+<title>文案复制器</title>
+<style>
+  :root {
+    --bg: #f4f4f5;
+    --card: #ffffff;
+    --text: #111111;
+    --muted: #666666;
+    --line: #dddddf;
+    --soft: #eeeeef;
+    --primary: #111111;
+    --ok: #0a7a35;
+    --warn: #9f2a20;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  }
+  button, input, textarea { font: inherit; }
+  .page {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid #ececef;
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .sub {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .stat {
+    min-height: 72px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .stat span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .stat strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+  .label {
+    display: block;
+    margin: 16px 0 8px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  textarea {
+    width: 100%;
+    min-height: 168px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 13px;
+    background: #fff;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .note {
+    min-height: 58px;
+    padding: 13px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fafafa;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .controls {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  button {
+    width: 100%;
+    min-height: 54px;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.25;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+  .primary { background: var(--primary); color: #fff; }
+  .secondary { background: var(--soft); color: var(--text); }
+  .jumpBox {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fafafa;
+  }
+  .jumpTitle {
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .jumpRow {
+    display: grid;
+    grid-template-columns: 1fr 104px;
+    gap: 10px;
+    align-items: stretch;
+  }
+  input {
+    width: 100%;
+    min-width: 0;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #fff;
+    color: var(--text);
+    font-size: 17px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .status {
+    min-height: 24px;
+    margin-top: 14px;
+    color: var(--ok);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .status.warn { color: var(--warn); }
+  .tip {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  @media (max-width: 380px) {
+    .page { padding-left: 12px; padding-right: 12px; }
+    .card { padding: 14px; }
+    .stats, .row, .jumpRow { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="card" aria-labelledby="title">
+      <h1 id="title">文案复制器</h1>
+      <p class="sub">从公开 Google 表格 CSV 自动读取文案。页面会显示中文翻译/注释，但复制时只复制「可复制文案」。</p>
+      <div class="stats" aria-live="polite">
+        <div class="stat"><span>已读取文案数量</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>当前进度</span><strong id="positionText">0 / 0</strong></div>
+      </div>
+      <label class="label" for="preview">当前文案预览</label>
+      <textarea id="preview" readonly placeholder="正在读取表格数据..."></textarea>
+      <span class="label">中文翻译 / 中文注释</span>
+      <div class="note" id="note">正在读取表格数据...</div>
+      <div class="controls">
+        <button id="copyBtn" class="primary" type="button">复制下一条文案</button>
+        <div class="row">
+          <button id="prevBtn" class="secondary" type="button">上一条</button>
+          <button id="resetBtn" class="secondary" type="button">重置到第 1 条</button>
         </div>
-        <div class="tool-name">文案复制工作台</div>
-        <h1>文案复制工作台</h1>
-        <p>给批量发布视频准备的轻量工作台，只领取、只复制、自动锁定已使用文案。</p>
-        <div class="status-strip" aria-label="工作台状态">
-          <div class="status-chip is-live">实时读取表格</div>
-          <div class="status-chip is-lock">防重复领取</div>
-          <div class="status-chip is-copy">只复制文案</div>
+        <button id="refreshBtn" class="secondary" type="button">刷新表格数据</button>
+      </div>
+      <div class="jumpBox">
+        <div class="jumpTitle">跳转到指定编号</div>
+        <div class="jumpRow">
+          <input id="jumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
+          <button id="jumpBtn" class="secondary" type="button">跳转</button>
         </div>
-      </header>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <p class="tip">如果 iPhone Safari 自动复制失败，请长按上方文本框手动复制。中文翻译/注释只用于查看，不会复制。</p>
+    </section>
+  </main>
+<script>
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5lhOtFR46NsxGgHJrrymb0xWFRgqXPU8cLMzpfDdnb8Eu1OpNVPkQbqMcLtwcM0BgYr4SIfVrfX1_/pub?output=csv";
+const STORAGE_KEY = "caption_copy_google_sheet_index_v1";
 
-      <section class="view is-active" data-view="home">
-        <div class="mode-grid">
-          <button class="mode-button" type="button" data-nav="daily">
-            <strong>日常发布</strong>
-            <span>领取不挂具体商品的视频文案</span>
-            <em class="mode-meta">Daily captions</em>
-          </button>
-          <button class="mode-button" type="button" data-nav="cart">
-            <strong>挂车发布</strong>
-            <span>按商品领取挂车视频文案</span>
-            <em class="mode-meta">Product captions</em>
-          </button>
-        </div>
-        <p class="workspace-note">领取前不会展示下一条文案，多台手机同时使用时也会由服务端锁定，避免重复领取。</p>
-      </section>
+let items = [];
+let currentIndex = 0;
+let isLoading = false;
+const els = {};
 
-      <section class="view card" data-view="daily">
-        <div class="page-head">
-          <button class="ghost-button" type="button" data-nav="home">返回</button>
-          <h2>日常发布</h2>
-        </div>
-        <p class="page-kicker">从「日常发布」表按排序编号领取第一条未使用文案。</p>
+document.addEventListener("DOMContentLoaded", () => {
+  cacheElements();
+  bindEvents();
+  loadIndex();
+  loadSheet(false);
+});
 
-        <div class="tool-row">
-          <button class="refresh-button" type="button" id="dailyRefreshButton">刷新数据</button>
-          <span></span>
-        </div>
+function cacheElements() {
+  els.totalCount = document.getElementById("totalCount");
+  els.positionText = document.getElementById("positionText");
+  els.preview = document.getElementById("preview");
+  els.note = document.getElementById("note");
+  els.copyBtn = document.getElementById("copyBtn");
+  els.prevBtn = document.getElementById("prevBtn");
+  els.resetBtn = document.getElementById("resetBtn");
+  els.refreshBtn = document.getElementById("refreshBtn");
+  els.jumpInput = document.getElementById("jumpInput");
+  els.jumpBtn = document.getElementById("jumpBtn");
+  els.status = document.getElementById("status");
+}
 
-        <div class="stats-grid" id="dailyStats"></div>
+function bindEvents() {
+  els.copyBtn.addEventListener("click", copyNext);
+  els.prevBtn.addEventListener("click", prevOne);
+  els.resetBtn.addEventListener("click", resetIndex);
+  els.refreshBtn.addEventListener("click", () => loadSheet(true));
+  els.jumpBtn.addEventListener("click", jumpTo);
+  els.jumpInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") jumpTo();
+  });
+}
 
-        <button class="primary-button" type="button" id="dailyClaimButton">领取并复制</button>
-        <p class="tip" id="dailyTip" role="status" aria-live="polite"></p>
-        <div class="empty-state" id="dailyEmpty"></div>
+function loadIndex() {
+  const saved = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
+  currentIndex = Number.isFinite(saved) && saved >= 0 ? saved : 0;
+}
 
-        <article class="result-area" id="dailyResult" hidden>
-          <div class="copy-panel">
-            <span class="panel-label">已领取文案</span>
-            <p id="dailyCopyText"></p>
-          </div>
-          <div class="note-panel">
-            <span class="panel-label">中文注释</span>
-            <p id="dailyCnNote"></p>
-          </div>
-          <div class="meta-panel">
-            <p class="meta-line"><span class="panel-label">语言</span><span id="dailyLanguage"></span></p>
-            <p class="meta-line"><span class="panel-label">使用时间</span><span id="dailyUsedAt"></span></p>
-          </div>
-        </article>
-      </section>
+function saveIndex() {
+  localStorage.setItem(STORAGE_KEY, String(currentIndex));
+}
 
-      <section class="view card" data-view="cart">
-        <div class="page-head">
-          <button class="ghost-button" type="button" data-nav="home">返回</button>
-          <h2>挂车发布</h2>
-        </div>
-        <p class="page-kicker">先选择商品，再从该商品下按排序编号领取文案。</p>
+async function loadSheet(forceRefresh) {
+  if (!SHEET_CSV_URL || SHEET_CSV_URL.includes("这里填写")) {
+    items = [];
+    currentIndex = 0;
+    render();
+    setStatus("请先在 index.html 顶部填写 SHEET_CSV_URL。", true, 0);
+    return;
+  }
 
-        <button class="refresh-button" type="button" id="cartRefreshButton">刷新数据</button>
+  isLoading = true;
+  render();
+  setStatus(forceRefresh ? "正在刷新表格数据..." : "正在读取表格数据...", false, 0);
 
-        <label class="field-label" for="productSelect">请选择商品</label>
-        <select class="select-field" id="productSelect">
-          <option value="">加载中...</option>
-        </select>
+  try {
+    const url = forceRefresh ? SHEET_CSV_URL + "&t=" + Date.now() : SHEET_CSV_URL;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    items = parseSheetCsv(await res.text());
+    if (currentIndex >= items.length) currentIndex = Math.max(items.length - 1, 0);
+    saveIndex();
+    setStatus("已读取 " + items.length + " 条文案。");
+  } catch (error) {
+    items = [];
+    currentIndex = 0;
+    setStatus("读取失败，请检查 CSV 链接是否公开可访问。", true, 0);
+  } finally {
+    isLoading = false;
+    render();
+  }
+}
 
-        <div class="product-card" id="selectedProductCard" hidden>
-          <span>商品名称</span>
-          <strong id="selectedProductName"></strong>
-        </div>
+function parseSheetCsv(csvText) {
+  const rows = parseCsv(csvText);
+  if (!rows.length) return [];
+  const headers = rows[0].map((cell) => cleanCell(cell));
+  const idIndex = headers.indexOf("编号");
+  const copyIndex = headers.indexOf("可复制文案");
+  const noteIndex = headers.indexOf("中文注释");
+  if (copyIndex === -1 || noteIndex === -1) throw new Error("CSV 缺少必要字段");
 
-        <div class="stats-grid" id="cartStats"></div>
+  return rows.slice(1).reduce((result, row, rowIndex) => {
+    const isEmptyRow = row.every((cell) => cleanCell(cell) === "");
+    const copyText = cleanCell(row[copyIndex]);
+    if (isEmptyRow || !copyText) return result;
+    result.push({
+      id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+      copyText,
+      note: cleanCell(row[noteIndex])
+    });
+    return result;
+  }, []);
+}
 
-        <button class="primary-button" type="button" id="cartClaimButton">领取并复制</button>
-        <p class="tip" id="cartTip" role="status" aria-live="polite"></p>
-        <div class="empty-state" id="cartEmpty"></div>
-
-        <article class="result-area" id="cartResult" hidden>
-          <div class="copy-panel">
-            <span class="panel-label">已领取文案</span>
-            <p id="cartCopyText"></p>
-          </div>
-          <div class="note-panel">
-            <span class="panel-label">中文注释</span>
-            <p id="cartCnNote"></p>
-          </div>
-          <div class="meta-panel">
-            <p class="meta-line"><span class="panel-label">语言</span><span id="cartLanguage"></span></p>
-            <p class="meta-line"><span class="panel-label">使用时间</span><span id="cartUsedAt"></span></p>
-          </div>
-        </article>
-      </section>
-    </main>
-
-    <script>
-      const state = {
-        view: 'home',
-        dailyStats: { total: 0, used: 0, unused: 0 },
-        cartStats: { productName: '', total: 0, used: 0, unused: 0 },
-        products: [],
-        selectedProduct: '',
-        loading: false,
-      };
-
-      const els = {};
-
-      document.addEventListener('DOMContentLoaded', () => {
-        cacheElements();
-        bindEvents();
-        renderStats(els.dailyStats, state.dailyStats);
-        renderStats(els.cartStats, state.cartStats);
-        setDailyLoading(true);
-        setCartLoading(true);
-        loadDailyStats();
-        loadCartProducts();
-      });
-
-      function cacheElements() {
-        els.views = document.querySelectorAll('.view');
-        els.navButtons = document.querySelectorAll('[data-nav]');
-        els.dailyStats = document.querySelector('#dailyStats');
-        els.cartStats = document.querySelector('#cartStats');
-        els.dailyClaimButton = document.querySelector('#dailyClaimButton');
-        els.cartClaimButton = document.querySelector('#cartClaimButton');
-        els.dailyRefreshButton = document.querySelector('#dailyRefreshButton');
-        els.cartRefreshButton = document.querySelector('#cartRefreshButton');
-        els.dailyTip = document.querySelector('#dailyTip');
-        els.cartTip = document.querySelector('#cartTip');
-        els.dailyEmpty = document.querySelector('#dailyEmpty');
-        els.cartEmpty = document.querySelector('#cartEmpty');
-        els.dailyResult = document.querySelector('#dailyResult');
-        els.cartResult = document.querySelector('#cartResult');
-        els.dailyCopyText = document.querySelector('#dailyCopyText');
-        els.cartCopyText = document.querySelector('#cartCopyText');
-        els.dailyCnNote = document.querySelector('#dailyCnNote');
-        els.cartCnNote = document.querySelector('#cartCnNote');
-        els.dailyLanguage = document.querySelector('#dailyLanguage');
-        els.cartLanguage = document.querySelector('#cartLanguage');
-        els.dailyUsedAt = document.querySelector('#dailyUsedAt');
-        els.cartUsedAt = document.querySelector('#cartUsedAt');
-        els.productSelect = document.querySelector('#productSelect');
-        els.selectedProductCard = document.querySelector('#selectedProductCard');
-        els.selectedProductName = document.querySelector('#selectedProductName');
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
       }
+      continue;
+    }
+    if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+    cell += char;
+  }
+  row.push(cell);
+  rows.push(row);
+  return rows.filter((currentRow) => currentRow.some((cellValue) => cleanCell(cellValue) !== ""));
+}
 
-      function bindEvents() {
-        els.navButtons.forEach((button) => {
-          button.addEventListener('click', () => showView(button.dataset.nav));
-        });
+function cleanCell(value) {
+  return String(value || "").trim();
+}
 
-        els.dailyRefreshButton.addEventListener('click', () => {
-          clearTip(els.dailyTip);
-          loadDailyStats();
-        });
+function render() {
+  const total = items.length;
+  const item = items[currentIndex];
+  const visibleIndex = total ? currentIndex + 1 : 0;
+  els.totalCount.textContent = String(total);
+  els.positionText.textContent = visibleIndex + " / " + total;
+  els.jumpInput.max = String(Math.max(total, 1));
+  if (isLoading) {
+    els.preview.value = "正在读取表格数据...";
+    els.note.textContent = "正在读取表格数据...";
+  } else if (item) {
+    els.preview.value = item.copyText;
+    els.note.textContent = item.note || "无中文注释";
+  } else {
+    els.preview.value = "";
+    els.note.textContent = "没有可用文案。";
+  }
+  const disabled = isLoading || total === 0;
+  els.copyBtn.disabled = disabled;
+  els.prevBtn.disabled = disabled || currentIndex <= 0;
+  els.resetBtn.disabled = disabled || currentIndex === 0;
+  els.jumpBtn.disabled = disabled;
+  els.refreshBtn.disabled = isLoading;
+}
 
-        els.cartRefreshButton.addEventListener('click', () => {
-          clearTip(els.cartTip);
-          loadCartProducts(true);
-        });
+async function copyNext() {
+  const item = items[currentIndex];
+  if (!item) {
+    setStatus("没有可复制的文案。", true);
+    return;
+  }
+  const copiedNumber = currentIndex + 1;
+  const ok = await copyText(item.copyText);
+  if (currentIndex < items.length - 1) {
+    currentIndex += 1;
+    saveIndex();
+  }
+  render();
+  setStatus(ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文本框手动复制。", !ok, ok ? 1800 : 3500);
+}
 
-        els.dailyClaimButton.addEventListener('click', claimDaily);
-        els.cartClaimButton.addEventListener('click', claimCart);
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      return fallbackCopy();
+    }
+  }
+  return fallbackCopy();
+}
 
-        els.productSelect.addEventListener('change', () => {
-          state.selectedProduct = els.productSelect.value;
-          clearCartResult();
-          renderSelectedProduct();
-          loadCartStats();
-        });
-      }
+function fallbackCopy() {
+  try {
+    els.preview.focus();
+    els.preview.select();
+    els.preview.setSelectionRange(0, els.preview.value.length);
+    return document.execCommand("copy");
+  } catch (error) {
+    return false;
+  }
+}
 
-      function showView(viewName) {
-        state.view = viewName;
-        els.views.forEach((view) => {
-          view.classList.toggle('is-active', view.dataset.view === viewName);
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+function prevOne() {
+  if (currentIndex > 0) {
+    currentIndex -= 1;
+    saveIndex();
+    render();
+    setStatus("已回到第 " + (currentIndex + 1) + " 条。");
+  }
+}
 
-      function loadDailyStats() {
-        setDailyLoading(true);
-        google.script.run
-          .withSuccessHandler((stats) => {
-            state.dailyStats = stats || { total: 0, used: 0, unused: 0 };
-            renderDaily();
-            setDailyLoading(false);
-          })
-          .withFailureHandler((error) => {
-            setDailyLoading(false);
-            showTip(els.dailyTip, getErrorMessage(error), true);
-          })
-          .getDailyStats();
-      }
+function resetIndex() {
+  currentIndex = 0;
+  saveIndex();
+  render();
+  setStatus("已重置到第 1 条。");
+}
 
-      function loadCartProducts(keepCurrent) {
-        setCartLoading(true);
-        google.script.run
-          .withSuccessHandler((products) => {
-            state.products = Array.isArray(products) ? products : [];
+function jumpTo() {
+  const target = cleanCell(els.jumpInput.value);
+  if (!target) {
+    setStatus("请输入要跳转的编号。", true);
+    return;
+  }
+  const foundIndex = items.findIndex((item) => item.id === target);
+  if (foundIndex === -1) {
+    setStatus("没有找到编号 " + target + "。", true);
+    return;
+  }
+  currentIndex = foundIndex;
+  saveIndex();
+  render();
+  setStatus("已跳转到编号 " + target + "。");
+}
 
-            if (keepCurrent && state.products.includes(state.selectedProduct)) {
-              renderProductOptions(state.selectedProduct);
-            } else {
-              state.selectedProduct = state.products[0] || '';
-              renderProductOptions(state.selectedProduct);
-            }
-
-            renderSelectedProduct();
-            loadCartStats();
-          })
-          .withFailureHandler((error) => {
-            setCartLoading(false);
-            showTip(els.cartTip, getErrorMessage(error), true);
-          })
-          .getCartProducts();
-      }
-
-      function loadCartStats() {
-        if (!state.selectedProduct) {
-          state.cartStats = { productName: '', total: 0, used: 0, unused: 0 };
-          renderCart();
-          setCartLoading(false);
-          return;
-        }
-
-        setCartLoading(true);
-        google.script.run
-          .withSuccessHandler((stats) => {
-            state.cartStats = stats || { productName: state.selectedProduct, total: 0, used: 0, unused: 0 };
-            renderCart();
-            setCartLoading(false);
-          })
-          .withFailureHandler((error) => {
-            setCartLoading(false);
-            showTip(els.cartTip, getErrorMessage(error), true);
-          })
-          .getCartStats(state.selectedProduct);
-      }
-
-      function claimDaily() {
-        setDailyLoading(true);
-        clearTip(els.dailyTip);
-
-        google.script.run
-          .withSuccessHandler(async (result) => {
-            if (!result || !result.success) {
-              showNoAvailable(els.dailyEmpty, result && result.message
-                ? result.message
-                : '当前没有可用文案，请在 Google Sheets「日常发布」表中新增文案。');
-              clearDailyResult();
-              loadDailyStats();
-              return;
-            }
-
-            await showClaimResult({
-              result,
-              tipEl: els.dailyTip,
-              resultEl: els.dailyResult,
-              copyTextEl: els.dailyCopyText,
-              cnNoteEl: els.dailyCnNote,
-              languageEl: els.dailyLanguage,
-              usedAtEl: els.dailyUsedAt,
-            });
-            loadDailyStats();
-          })
-          .withFailureHandler((error) => {
-            setDailyLoading(false);
-            showTip(els.dailyTip, getErrorMessage(error), true);
-          })
-          .claimDailyCaption();
-      }
-
-      function claimCart() {
-        if (!state.selectedProduct) {
-          showTip(els.cartTip, '请先选择商品。', true);
-          return;
-        }
-
-        setCartLoading(true);
-        clearTip(els.cartTip);
-
-        google.script.run
-          .withSuccessHandler(async (result) => {
-            if (!result || !result.success) {
-              showNoAvailable(els.cartEmpty, result && result.message
-                ? result.message
-                : '当前商品没有可用文案，请在 Google Sheets「挂车发布」表中为该商品新增文案。');
-              clearCartResult();
-              loadCartStats();
-              return;
-            }
-
-            await showClaimResult({
-              result,
-              tipEl: els.cartTip,
-              resultEl: els.cartResult,
-              copyTextEl: els.cartCopyText,
-              cnNoteEl: els.cartCnNote,
-              languageEl: els.cartLanguage,
-              usedAtEl: els.cartUsedAt,
-            });
-            loadCartStats();
-          })
-          .withFailureHandler((error) => {
-            setCartLoading(false);
-            showTip(els.cartTip, getErrorMessage(error), true);
-          })
-          .claimCartCaption(state.selectedProduct);
-      }
-
-      async function showClaimResult(options) {
-        const copied = await copyText(options.result.copyText || '');
-
-        options.copyTextEl.textContent = options.result.copyText || '';
-        options.cnNoteEl.textContent = options.result.cnNote || '';
-        options.languageEl.textContent = options.result.language || '';
-        options.usedAtEl.textContent = options.result.usedAt || '';
-        options.resultEl.hidden = false;
-
-        showTip(
-          options.tipEl,
-          copied ? '已领取并复制' : '自动复制失败，请手动长按复制下方文案。',
-          !copied
-        );
-      }
-
-      async function copyText(text) {
-        if (!text) {
-          return false;
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          try {
-            await navigator.clipboard.writeText(text);
-            return true;
-          } catch (error) {
-            return fallbackCopy(text);
-          }
-        }
-
-        return fallbackCopy(text);
-      }
-
-      function fallbackCopy(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.top = '-999px';
-        textarea.style.left = '-999px';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        textarea.setSelectionRange(0, textarea.value.length);
-
-        let copied = false;
-
-        try {
-          copied = document.execCommand('copy');
-        } catch (error) {
-          copied = false;
-        }
-
-        textarea.remove();
-        return copied;
-      }
-
-      function renderDaily() {
-        renderStats(els.dailyStats, state.dailyStats);
-        els.dailyClaimButton.disabled = state.loading || state.dailyStats.unused === 0;
-        showNoAvailable(
-          els.dailyEmpty,
-          state.dailyStats.unused === 0
-            ? '当前没有可用文案，请在 Google Sheets「日常发布」表中新增文案。'
-            : ''
-        );
-      }
-
-      function renderCart() {
-        renderStats(els.cartStats, state.cartStats);
-        els.cartClaimButton.disabled = state.loading || !state.selectedProduct || state.cartStats.unused === 0;
-        showNoAvailable(
-          els.cartEmpty,
-          state.selectedProduct && state.cartStats.unused === 0
-            ? '当前商品没有可用文案，请在 Google Sheets「挂车发布」表中为该商品新增文案。'
-            : ''
-        );
-      }
-
-      function renderStats(container, stats) {
-        const safeStats = stats || { total: 0, used: 0, unused: 0 };
-        container.innerHTML = [
-          { label: '总文案', value: `${safeStats.total || 0} 条` },
-          { label: '已使用', value: `${safeStats.used || 0} 条` },
-          { label: '剩余', value: `${safeStats.unused || 0} 条` },
-        ].map((item) => `
-          <div class="stat-card">
-            <span>${item.label}</span>
-            <strong>${item.value}</strong>
-          </div>
-        `).join('');
-      }
-
-      function renderProductOptions(selectedValue) {
-        const options = state.products.map((product) => (
-          `<option value="${escapeHtml(product)}">${escapeHtml(product)}</option>`
-        ));
-
-        els.productSelect.innerHTML = options.length
-          ? options.join('')
-          : '<option value="">暂无商品</option>';
-
-        els.productSelect.value = selectedValue || '';
-      }
-
-      function renderSelectedProduct() {
-        const hasProduct = Boolean(state.selectedProduct);
-        els.selectedProductCard.hidden = !hasProduct;
-        els.selectedProductName.textContent = state.selectedProduct;
-      }
-
-      function setDailyLoading(isLoading) {
-        state.loading = isLoading;
-        els.dailyClaimButton.disabled = isLoading || state.dailyStats.unused === 0;
-        els.dailyRefreshButton.disabled = isLoading;
-      }
-
-      function setCartLoading(isLoading) {
-        state.loading = isLoading;
-        els.cartClaimButton.disabled = isLoading || !state.selectedProduct || state.cartStats.unused === 0;
-        els.cartRefreshButton.disabled = isLoading;
-        els.productSelect.disabled = isLoading;
-      }
-
-      function showNoAvailable(element, message) {
-        element.textContent = message || '';
-        element.classList.toggle('is-visible', Boolean(message));
-      }
-
-      function showTip(element, message, isWarning) {
-        element.textContent = message || '';
-        element.classList.toggle('is-warning', Boolean(isWarning));
-      }
-
-      function clearTip(element) {
-        showTip(element, '', false);
-      }
-
-      function clearDailyResult() {
-        els.dailyResult.hidden = true;
-        els.dailyCopyText.textContent = '';
-        els.dailyCnNote.textContent = '';
-        els.dailyLanguage.textContent = '';
-        els.dailyUsedAt.textContent = '';
-      }
-
-      function clearCartResult() {
-        clearTip(els.cartTip);
-        els.cartResult.hidden = true;
-        els.cartCopyText.textContent = '';
-        els.cartCnNote.textContent = '';
-        els.cartLanguage.textContent = '';
-        els.cartUsedAt.textContent = '';
-      }
-
-      function getErrorMessage(error) {
-        return error && error.message ? error.message : '读取失败，请稍后重试。';
-      }
-
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#039;');
-      }
-    </script>
-  </body>
+function setStatus(text, warning, duration) {
+  els.status.textContent = text || "";
+  els.status.className = warning ? "status warn" : "status";
+  clearTimeout(window.__statusTimer);
+  if (text && duration !== 0) {
+    window.__statusTimer = setTimeout(() => {
+      els.status.textContent = "";
+      els.status.className = "status";
+    }, duration || 1800);
+  }
+}
+</script>
+</body>
 </html>

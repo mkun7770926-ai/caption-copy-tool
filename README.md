@@ -1,171 +1,76 @@
-# Mark 的个人小工具｜文案复制工作台
+# Google 表格数据源版文案复制器
 
-这是一个使用 Google Sheets 作为在线文案库、使用 Google Apps Script 部署成网页的「Mark 的个人小工具｜文案复制工作台」。
+这是一个纯 HTML、CSS、JavaScript 的静态网页，适合部署到 GitHub Pages。网页会读取公开的 Google Sheets CSV，不再把文案写死在 `index.html`。
 
-手机打开同一个 Web App 链接后，可以实时读取 Google Sheets 数据，领取文案，复制文案，并把该文案标记为已使用。多台手机同时使用时，服务端会通过 `LockService` 避免重复领取同一条文案。
+## 文件结构
 
-## 文件
+只需要保留这 3 个文件：
 
-- `Code.gs`：Google Apps Script 服务端代码。
-- `Index.html`：网页 UI、CSS、前端 JavaScript。
-- `README.md`：部署和使用说明。
-
-## 1. 创建 Google Sheets
-
-1. 打开 Google Sheets。
-2. 新建一个空白电子表格。
-3. 建议命名为：`Mark 的个人小工具 - 文案复制工作台数据表`。
-
-## 2. 创建两张 Sheet
-
-同一个 Spreadsheet 里需要两张 Sheet，名称必须完全一致：
-
-- `日常发布`
-- `挂车发布`
-
-## 3. 日常发布表结构
-
-`日常发布` 从第 1 行开始填写字段名：
-
-| 列 | 字段 |
-| --- | --- |
-| A | 排序编号 |
-| B | 可复制文案 |
-| C | 中文注释 |
-| D | 语言 |
-| E | 状态 |
-| F | 使用时间 |
-| G | 备注 |
-
-示例：
-
-| 排序编号 | 可复制文案 | 中文注释 | 语言 | 状态 | 使用时间 | 备注 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | Tu veux un peu de douceur dans ta journee ? | 温柔型日常文案 | FR | 未使用 |  |  |
-
-## 4. 挂车发布表结构
-
-`挂车发布` 从第 1 行开始填写字段名：
-
-| 列 | 字段 |
-| --- | --- |
-| A | 商品名称 |
-| B | 排序编号 |
-| C | 可复制文案 |
-| D | 中文注释 |
-| E | 语言 |
-| F | 状态 |
-| G | 使用时间 |
-| H | 备注 |
-
-示例：
-
-| 商品名称 | 排序编号 | 可复制文案 | 中文注释 | 语言 | 状态 | 使用时间 | 备注 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 厨房切菜器 | 1 | Ce gadget va changer ta cuisine. | 强调节省时间 | FR | 未使用 |  |  |
-
-## 5. 状态填写规则
-
-状态字段只使用两种值：
-
-- `未使用`
-- `已使用`
-
-新文案请填写 `未使用`。
-
-网站领取成功后，会自动把该行状态改为 `已使用`，并写入使用时间。
-
-## 6. 打开 Apps Script
-
-1. 在 Google Sheets 顶部菜单点击「扩展程序」。
-2. 点击「Apps Script」。
-3. 会打开一个 Apps Script 项目。
-
-## 7. 粘贴代码
-
-1. 打开 Apps Script 里的 `Code.gs`。
-2. 删除默认内容。
-3. 粘贴本项目的 `Code.gs` 全部内容。
-4. 点击左侧「+」添加 HTML 文件。
-5. 文件名填写：`Index`。
-6. 把本项目的 `Index.html` 全部内容粘贴进去。
-
-如果脚本是从 Google Sheets 里打开的绑定脚本，`Code.gs` 里的 `SPREADSHEET_ID` 保持空字符串即可。
-
-如果你使用独立 Apps Script 项目，请把 Google Sheets 链接里的 Spreadsheet ID 填入：
-
-```js
-const SPREADSHEET_ID = '你的 Spreadsheet ID';
+```text
+index.html
+README.md
+.nojekyll
 ```
 
-## 8. 授权脚本
+## 1. 创建 Google 表格
 
-1. 在 Apps Script 顶部选择任意函数，例如 `getDailyStats`。
-2. 点击「运行」。
-3. Google 会要求授权。
-4. 选择你的 Google 账号。
-5. 允许脚本读取和修改这个 Google Sheets。
+1. 打开 Google Sheets。
+2. 新建一个空白表格。
+3. 第一行字段名必须是：
 
-这是必须的，因为网站领取文案时需要读取表格并把状态写成 `已使用`。
+```text
+编号, 可复制文案, 中文注释
+```
 
-## 9. 部署成 Web App
+网页只会复制「可复制文案」这一列。「中文注释」会显示在页面上，方便查看中文翻译，但不会被复制。「编号」也不会被复制。
 
-1. 在 Apps Script 右上角点击「部署」。
-2. 选择「新建部署」。
-3. 类型选择「Web 应用」。
-4. 描述可以填写：`文案复制工作台 Web App`。
-5. 设置：
-   - Execute as：`Me`
-   - Who has access：`Anyone`
-6. 点击「部署」。
-7. 按提示完成授权。
+## 2. 发布 Google 表格为 CSV
 
-## 10. 获取 Web App 链接
+1. 在 Google 表格顶部点击「文件」。
+2. 点击「共享」。
+3. 点击「发布到网络」。
+4. 选择要发布的工作表。
+5. 格式选择「逗号分隔值 (.csv)」。
+6. 点击「发布」。
+7. 复制生成的 CSV 链接。
 
-部署完成后，Apps Script 会显示一个 Web App URL。
+这个 CSV 链接必须公开可访问。
 
-复制这个 URL，之后手机和电脑都访问这个链接即可打开「文案复制工作台」。
+## 3. 把 CSV 链接填入 index.html
 
-## 11. iPhone Safari 打开
+打开 `index.html`，找到这一行：
 
-1. 在 iPhone 上打开 Safari。
-2. 粘贴 Web App URL。
-3. 打开页面。
-4. 选择「日常发布」或「挂车发布」。
-5. 点击「领取并复制」。
+```js
+const SHEET_CSV_URL = "这里填写我的 Google Sheets CSV 发布链接";
+```
 
-如果 Safari 自动复制失败，页面会显示已领取文案，可以手动长按复制。
+把引号里的内容替换成你的 CSV 发布链接，例如：
 
-只要服务端领取成功，该文案就已经标记为 `已使用`，不会恢复。
+```js
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/xxxxx/pub?output=csv";
+```
 
-## 12. iPhone 添加到主屏幕
+## 4. 部署到 GitHub Pages
 
-1. 用 Safari 打开 Web App URL。
+1. 把 `index.html`、`README.md`、`.nojekyll` 上传到 GitHub 仓库。
+2. 打开仓库 Settings。
+3. 进入 Pages。
+4. Source 选择 `Deploy from a branch`。
+5. Branch 选择 `main`，目录选择 `/root`。
+6. 保存后等待 GitHub Pages 生成网址。
+
+## 5. 以后如何更新文案
+
+以后只需要修改 Google 表格，不需要修改 HTML。
+
+网页打开时会自动读取 CSV。点击「刷新表格数据」时，会重新 fetch Google Sheets CSV，并加上时间戳避免缓存。
+
+## 6. iPhone 添加到主屏幕
+
+1. 用 iPhone Safari 打开 GitHub Pages 网页。
 2. 点击底部分享按钮。
 3. 选择「添加到主屏幕」。
-4. 名称可以填：`Mark 小工具` 或 `文案复制工作台`。
+4. 名称可以填写「文案复制器」。
 5. 点击「添加」。
 
-之后可以像 App 一样从主屏幕打开。
-
-## 13. 如何更新文案
-
-直接修改 Google Sheets 即可：
-
-- 新增文案行。
-- 状态填 `未使用`。
-- 排序编号填数字。
-- 挂车文案要填写商品名称。
-
-网站点击「刷新数据」后，会重新读取 Google Sheets 最新统计和商品列表。
-
-## 14. 注意事项
-
-- 已使用文案不会再次领取。
-- 不做恢复按钮。
-- 不做重置按钮。
-- 不要随便把状态从 `已使用` 改回 `未使用`。
-- 多台手机同时点击领取时，系统通过 `LockService` 加锁，避免重复领取同一条文案。
-- 自动复制失败时，文案也已经算领取成功，不会退回状态。
-- 真正复制到剪贴板的内容只有「可复制文案」。
-- 中文注释、商品名称、语言、排序编号、状态、使用时间、备注都不会被复制。
+之后就可以像 App 一样从主屏幕打开。复制失败时，页面会提示长按文本框手动复制。
