@@ -92,7 +92,7 @@
 
   .menuCard {
     width: 100%;
-    min-height: 118px;
+    min-height: 108px;
     padding: 18px;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -123,13 +123,6 @@
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 8px 22px rgba(16,17,20,.05);
-  }
-
-  .sectionTitle {
-    margin: 0 0 8px;
-    font-size: 21px;
-    line-height: 1.25;
-    letter-spacing: 0;
   }
 
   .sub {
@@ -179,7 +172,7 @@
 
   textarea {
     width: 100%;
-    min-height: 150px;
+    min-height: 145px;
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 13px;
@@ -228,7 +221,7 @@
   .primary { background: var(--primary); color: #fff; }
   .secondary { background: var(--soft); color: var(--text); }
 
-  .note {
+  .note, .metaBox {
     min-height: 54px;
     padding: 12px;
     border: 1px solid var(--line);
@@ -357,61 +350,94 @@
     <section id="homeView" class="view is-active">
       <div class="hero">
         <h1>Mark 小工具</h1>
-        <p>选择你现在要做的事。文案和商品链接都从 Google 表格读取，刷新页面就能拿到最新内容。</p>
+        <p>选择当前任务。所有内容都从 Google 表格读取，刷新后自动拿最新数据。</p>
       </div>
 
       <div class="menuGrid">
-        <button class="menuCard" type="button" data-open-view="captionView">
-          <strong>文案复制</strong>
-          <span>按顺序复制下一条文案，中文注释只显示不复制。</span>
+        <button class="menuCard" type="button" data-open-view="dailyView">
+          <strong>日常发布</strong>
+          <span>复制日常文案，显示中文注释，不管使用时间。</span>
+        </button>
+
+        <button class="menuCard" type="button" data-open-view="cartCaptionView">
+          <strong>挂车发布</strong>
+          <span>显示商品名和中文注释，复制时只复制文案。</span>
         </button>
 
         <button class="menuCard" type="button" data-open-view="productView">
           <strong>挂车链接</strong>
-          <span>点商品名打开商品页，也可以一键复制完整商品链接。</span>
+          <span>点商品名打开商品页，也可以复制完整商品链接。</span>
         </button>
       </div>
     </section>
 
-    <section id="captionView" class="view">
+    <section id="dailyView" class="view">
       <div class="topbar">
         <button class="backBtn" type="button" data-open-view="homeView">返回</button>
-        <div class="topTitle">文案复制</div>
+        <div class="topTitle">日常发布</div>
       </div>
-
       <div class="card">
-        <p class="sub">复制时只复制「可复制文案」。编号和中文注释不会进入剪贴板。</p>
-
+        <p class="sub">按顺序复制日常文案。中文注释只显示，不会复制。</p>
         <div class="stats" aria-live="polite">
-          <div class="stat"><span>已读取文案</span><strong id="totalCount">0</strong></div>
-          <div class="stat"><span>当前进度</span><strong id="positionText">0 / 0</strong></div>
+          <div class="stat"><span>已读取文案</span><strong id="dailyTotal">0</strong></div>
+          <div class="stat"><span>当前进度</span><strong id="dailyPosition">0 / 0</strong></div>
         </div>
-
-        <label class="label" for="preview">当前文案</label>
-        <textarea id="preview" readonly placeholder="正在读取表格数据..."></textarea>
-
-        <span class="label">中文翻译 / 中文注释</span>
-        <div class="note" id="note">正在读取表格数据...</div>
-
+        <label class="label" for="dailyPreview">当前文案</label>
+        <textarea id="dailyPreview" readonly placeholder="正在读取表格数据..."></textarea>
+        <span class="label">中文注释</span>
+        <div class="note" id="dailyNote">正在读取表格数据...</div>
         <div class="controls">
-          <button id="copyBtn" class="primary" type="button">复制下一条文案</button>
+          <button id="dailyCopyBtn" class="primary" type="button">复制下一条文案</button>
           <div class="row">
-            <button id="prevBtn" class="secondary" type="button">上一条</button>
-            <button id="resetBtn" class="secondary" type="button">重置到第 1 条</button>
+            <button id="dailyPrevBtn" class="secondary" type="button">上一条</button>
+            <button id="dailyResetBtn" class="secondary" type="button">重置到第 1 条</button>
           </div>
-          <button id="refreshBtn" class="secondary" type="button">刷新文案表格</button>
+          <button id="dailyRefreshBtn" class="secondary" type="button">刷新日常发布</button>
         </div>
-
         <div class="jumpBox">
           <div class="jumpTitle">跳转到指定编号</div>
           <div class="jumpRow">
-            <input id="jumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
-            <button id="jumpBtn" class="secondary" type="button">跳转</button>
+            <input id="dailyJumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
+            <button id="dailyJumpBtn" class="secondary" type="button">跳转</button>
           </div>
         </div>
+        <div class="status" id="dailyStatus" role="status" aria-live="polite"></div>
+      </div>
+    </section>
 
-        <div class="status" id="status" role="status" aria-live="polite"></div>
-        <p class="tip">如果 iPhone Safari 自动复制失败，请长按文案框手动复制。</p>
+    <section id="cartCaptionView" class="view">
+      <div class="topbar">
+        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
+        <div class="topTitle">挂车发布</div>
+      </div>
+      <div class="card">
+        <p class="sub">挂车文案会显示商品名，但复制时只复制「可复制文案」。</p>
+        <div class="stats" aria-live="polite">
+          <div class="stat"><span>已读取文案</span><strong id="cartTotal">0</strong></div>
+          <div class="stat"><span>当前进度</span><strong id="cartPosition">0 / 0</strong></div>
+        </div>
+        <span class="label">商品名</span>
+        <div class="metaBox" id="cartProductName">正在读取表格数据...</div>
+        <label class="label" for="cartPreview">当前文案</label>
+        <textarea id="cartPreview" readonly placeholder="正在读取表格数据..."></textarea>
+        <span class="label">中文注释</span>
+        <div class="note" id="cartNote">正在读取表格数据...</div>
+        <div class="controls">
+          <button id="cartCopyBtn" class="primary" type="button">复制下一条文案</button>
+          <div class="row">
+            <button id="cartPrevBtn" class="secondary" type="button">上一条</button>
+            <button id="cartResetBtn" class="secondary" type="button">重置到第 1 条</button>
+          </div>
+          <button id="cartRefreshBtn" class="secondary" type="button">刷新挂车发布</button>
+        </div>
+        <div class="jumpBox">
+          <div class="jumpTitle">跳转到指定编号</div>
+          <div class="jumpRow">
+            <input id="cartJumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
+            <button id="cartJumpBtn" class="secondary" type="button">跳转</button>
+          </div>
+        </div>
+        <div class="status" id="cartStatus" role="status" aria-live="polite"></div>
       </div>
     </section>
 
@@ -420,20 +446,16 @@
         <button class="backBtn" type="button" data-open-view="homeView">返回</button>
         <div class="topTitle">挂车链接</div>
       </div>
-
       <div class="card">
         <p class="sub">商品表只填「编号、商品名、PID」。网页会自动补全 TikTok 商品链接。</p>
-
         <div class="stats" aria-live="polite">
           <div class="stat"><span>已读取商品</span><strong id="productCount">0</strong></div>
           <div class="stat"><span>链接前缀</span><strong>自动</strong></div>
         </div>
-
         <div class="productToolbar">
           <input id="productSearch" type="search" placeholder="搜索商品名">
-          <button id="productRefreshBtn" class="secondary" type="button">刷新商品表格</button>
+          <button id="productRefreshBtn" class="secondary" type="button">刷新挂车链接</button>
         </div>
-
         <div class="productList" id="productList"></div>
         <div class="status" id="productStatus" role="status" aria-live="polite"></div>
         <p class="tip">点商品名打开商品页；点「复制」复制完整商品链接。</p>
@@ -442,40 +464,34 @@
   </main>
 
 <script>
-const CAPTION_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5lhOtFR46NsxGgHJrrymb0xWFRgqXPU8cLMzpfDdnb8Eu1OpNVPkQbqMcLtwcM0BgYr4SIfVrfX1_/pub?output=csv";
-const PRODUCT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5lhOtFR46NsxGgHJrrymb0xWFRgqXPU8cLMzpfDdnb8Eu1OpNVPkQbqMcLtwcM0BgYr4SIfVrfX1_/pub?gid=2097162834&single=true&output=csv";
+const DAILY_CAPTION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
+const CART_CAPTION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=512170271&single=true&output=csv";
+const PRODUCT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
 const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
-const CAPTION_STORAGE_KEY = "caption_copy_google_sheet_index_v1";
 
-let captionItems = [];
-let currentIndex = 0;
-let isCaptionLoading = false;
+const captionModules = {
+  daily: { url: DAILY_CAPTION_CSV_URL, storageKey: "daily_caption_index_v2", items: [], index: 0, loading: false },
+  cart: { url: CART_CAPTION_CSV_URL, storageKey: "cart_caption_index_v2", items: [], index: 0, loading: false }
+};
+
 let productItems = [];
 let isProductLoading = false;
-
 const els = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   bindEvents();
-  loadCaptionIndex();
-  loadCaptionSheet(false);
+  initCaptionModule("daily");
+  initCaptionModule("cart");
+  loadCaptionSheet("daily", false);
+  loadCaptionSheet("cart", false);
   loadProductSheet(false);
 });
 
 function cacheElements() {
   els.views = document.querySelectorAll(".view");
-  els.totalCount = document.getElementById("totalCount");
-  els.positionText = document.getElementById("positionText");
-  els.preview = document.getElementById("preview");
-  els.note = document.getElementById("note");
-  els.copyBtn = document.getElementById("copyBtn");
-  els.prevBtn = document.getElementById("prevBtn");
-  els.resetBtn = document.getElementById("resetBtn");
-  els.refreshBtn = document.getElementById("refreshBtn");
-  els.jumpInput = document.getElementById("jumpInput");
-  els.jumpBtn = document.getElementById("jumpBtn");
-  els.status = document.getElementById("status");
+  cacheCaptionEls("daily");
+  cacheCaptionEls("cart");
   els.productCount = document.getElementById("productCount");
   els.productSearch = document.getElementById("productSearch");
   els.productRefreshBtn = document.getElementById("productRefreshBtn");
@@ -483,22 +499,46 @@ function cacheElements() {
   els.productStatus = document.getElementById("productStatus");
 }
 
+function cacheCaptionEls(type) {
+  const module = captionModules[type];
+  module.els = {
+    total: document.getElementById(type + "Total"),
+    position: document.getElementById(type + "Position"),
+    preview: document.getElementById(type + "Preview"),
+    note: document.getElementById(type + "Note"),
+    productName: document.getElementById(type + "ProductName"),
+    copyBtn: document.getElementById(type + "CopyBtn"),
+    prevBtn: document.getElementById(type + "PrevBtn"),
+    resetBtn: document.getElementById(type + "ResetBtn"),
+    refreshBtn: document.getElementById(type + "RefreshBtn"),
+    jumpInput: document.getElementById(type + "JumpInput"),
+    jumpBtn: document.getElementById(type + "JumpBtn"),
+    status: document.getElementById(type + "Status")
+  };
+}
+
 function bindEvents() {
   document.querySelectorAll("[data-open-view]").forEach((button) => {
     button.addEventListener("click", () => showView(button.dataset.openView));
   });
 
-  els.copyBtn.addEventListener("click", copyNextCaption);
-  els.prevBtn.addEventListener("click", prevCaption);
-  els.resetBtn.addEventListener("click", resetCaptionIndex);
-  els.refreshBtn.addEventListener("click", () => loadCaptionSheet(true));
-  els.jumpBtn.addEventListener("click", jumpToCaption);
-  els.jumpInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") jumpToCaption();
-  });
+  bindCaptionEvents("daily");
+  bindCaptionEvents("cart");
   els.productRefreshBtn.addEventListener("click", () => loadProductSheet(true));
   els.productSearch.addEventListener("input", renderProducts);
   els.productList.addEventListener("click", handleProductListClick);
+}
+
+function bindCaptionEvents(type) {
+  const module = captionModules[type];
+  module.els.copyBtn.addEventListener("click", () => copyNextCaption(type));
+  module.els.prevBtn.addEventListener("click", () => prevCaption(type));
+  module.els.resetBtn.addEventListener("click", () => resetCaptionIndex(type));
+  module.els.refreshBtn.addEventListener("click", () => loadCaptionSheet(type, true));
+  module.els.jumpBtn.addEventListener("click", () => jumpToCaption(type));
+  module.els.jumpInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") jumpToCaption(type);
+  });
 }
 
 function showView(viewId) {
@@ -506,32 +546,35 @@ function showView(viewId) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function loadCaptionIndex() {
-  const saved = parseInt(localStorage.getItem(CAPTION_STORAGE_KEY) || "0", 10);
-  currentIndex = Number.isFinite(saved) && saved >= 0 ? saved : 0;
+function initCaptionModule(type) {
+  const module = captionModules[type];
+  const saved = parseInt(localStorage.getItem(module.storageKey) || "0", 10);
+  module.index = Number.isFinite(saved) && saved >= 0 ? saved : 0;
 }
 
-function saveCaptionIndex() {
-  localStorage.setItem(CAPTION_STORAGE_KEY, String(currentIndex));
+function saveCaptionIndex(type) {
+  const module = captionModules[type];
+  localStorage.setItem(module.storageKey, String(module.index));
 }
 
-async function loadCaptionSheet(forceRefresh) {
-  isCaptionLoading = true;
-  renderCaption();
-  setStatus(els.status, forceRefresh ? "正在刷新文案表格..." : "正在读取文案表格...", false, 0);
+async function loadCaptionSheet(type, forceRefresh) {
+  const module = captionModules[type];
+  module.loading = true;
+  renderCaption(type);
+  setStatus(module.els.status, forceRefresh ? "正在刷新表格..." : "正在读取表格...", false, 0);
 
   try {
-    captionItems = parseCaptionCsv(await fetchCsv(CAPTION_SHEET_CSV_URL, forceRefresh));
-    if (currentIndex >= captionItems.length) currentIndex = Math.max(captionItems.length - 1, 0);
-    saveCaptionIndex();
-    setStatus(els.status, "已读取 " + captionItems.length + " 条文案。");
+    module.items = parseCaptionCsv(await fetchCsv(module.url, forceRefresh), type === "cart");
+    if (module.index >= module.items.length) module.index = Math.max(module.items.length - 1, 0);
+    saveCaptionIndex(type);
+    setStatus(module.els.status, "已读取 " + module.items.length + " 条文案。");
   } catch (error) {
-    captionItems = [];
-    currentIndex = 0;
-    setStatus(els.status, "文案读取失败，请检查 CSV 链接和字段名。", true, 0);
+    module.items = [];
+    module.index = 0;
+    setStatus(module.els.status, "读取失败，请检查 CSV 链接和字段名。", true, 0);
   } finally {
-    isCaptionLoading = false;
-    renderCaption();
+    module.loading = false;
+    renderCaption(type);
   }
 }
 
@@ -559,13 +602,15 @@ async function fetchCsv(url, forceRefresh) {
   return res.text();
 }
 
-function parseCaptionCsv(csvText) {
+function parseCaptionCsv(csvText, hasProductName) {
   const rows = parseCsv(csvText);
   if (!rows.length) return [];
+
   const headers = rows[0].map((cell) => cleanCell(cell));
-  const idIndex = headers.indexOf("编号");
-  const copyIndex = headers.indexOf("可复制文案");
-  const noteIndex = headers.indexOf("中文注释");
+  const idIndex = findHeader(headers, ["排序编号", "编号"]);
+  const productIndex = findHeader(headers, ["商品名称", "商品名"]);
+  const copyIndex = findHeader(headers, ["可复制文案"]);
+  const noteIndex = findHeader(headers, ["中文注释"]);
   if (copyIndex === -1 || noteIndex === -1) throw new Error("CSV 缺少必要字段");
 
   return rows.slice(1).reduce((result, row, rowIndex) => {
@@ -573,6 +618,7 @@ function parseCaptionCsv(csvText) {
     if (isEmptyRow(row) || !copyText) return result;
     result.push({
       id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+      productName: hasProductName && productIndex >= 0 ? cleanCell(row[productIndex]) : "",
       copyText,
       note: cleanCell(row[noteIndex])
     });
@@ -583,6 +629,7 @@ function parseCaptionCsv(csvText) {
 function parseProductCsv(csvText) {
   const rows = parseCsv(csvText);
   if (!rows.length) return [];
+
   const headers = rows[0].map((cell) => cleanCell(cell).toUpperCase());
   const idIndex = headers.indexOf("编号");
   const nameIndex = headers.indexOf("商品名");
@@ -601,6 +648,10 @@ function parseProductCsv(csvText) {
     });
     return result;
   }, []);
+}
+
+function findHeader(headers, names) {
+  return headers.findIndex((header) => names.includes(header));
 }
 
 function parseCsv(text) {
@@ -654,31 +705,36 @@ function isEmptyRow(row) {
   return row.every((cell) => cleanCell(cell) === "");
 }
 
-function renderCaption() {
-  const total = captionItems.length;
-  const item = captionItems[currentIndex];
-  const visibleIndex = total ? currentIndex + 1 : 0;
-  els.totalCount.textContent = String(total);
-  els.positionText.textContent = visibleIndex + " / " + total;
-  els.jumpInput.max = String(Math.max(total, 1));
+function renderCaption(type) {
+  const module = captionModules[type];
+  const total = module.items.length;
+  const item = module.items[module.index];
+  const visibleIndex = total ? module.index + 1 : 0;
 
-  if (isCaptionLoading) {
-    els.preview.value = "正在读取表格数据...";
-    els.note.textContent = "正在读取表格数据...";
+  module.els.total.textContent = String(total);
+  module.els.position.textContent = visibleIndex + " / " + total;
+  module.els.jumpInput.max = String(Math.max(total, 1));
+
+  if (module.loading) {
+    module.els.preview.value = "正在读取表格数据...";
+    module.els.note.textContent = "正在读取表格数据...";
+    if (module.els.productName) module.els.productName.textContent = "正在读取表格数据...";
   } else if (item) {
-    els.preview.value = item.copyText;
-    els.note.textContent = item.note || "无中文注释";
+    module.els.preview.value = item.copyText;
+    module.els.note.textContent = item.note || "无中文注释";
+    if (module.els.productName) module.els.productName.textContent = item.productName || "无商品名";
   } else {
-    els.preview.value = "";
-    els.note.textContent = "没有可用文案。";
+    module.els.preview.value = "";
+    module.els.note.textContent = "没有可用文案。";
+    if (module.els.productName) module.els.productName.textContent = "没有可用商品。";
   }
 
-  const disabled = isCaptionLoading || total === 0;
-  els.copyBtn.disabled = disabled;
-  els.prevBtn.disabled = disabled || currentIndex <= 0;
-  els.resetBtn.disabled = disabled || currentIndex === 0;
-  els.jumpBtn.disabled = disabled;
-  els.refreshBtn.disabled = isCaptionLoading;
+  const disabled = module.loading || total === 0;
+  module.els.copyBtn.disabled = disabled;
+  module.els.prevBtn.disabled = disabled || module.index <= 0;
+  module.els.resetBtn.disabled = disabled || module.index === 0;
+  module.els.jumpBtn.disabled = disabled;
+  module.els.refreshBtn.disabled = module.loading;
 }
 
 function renderProducts() {
@@ -691,7 +747,6 @@ function renderProducts() {
     els.productList.innerHTML = '<div class="note">正在读取商品表格...</div>';
     return;
   }
-
   if (!filtered.length) {
     els.productList.innerHTML = '<div class="note">没有可用商品。</div>';
     return;
@@ -706,62 +761,65 @@ function renderProducts() {
   ].join("")).join("");
 }
 
-async function copyNextCaption() {
-  const item = captionItems[currentIndex];
+async function copyNextCaption(type) {
+  const module = captionModules[type];
+  const item = module.items[module.index];
   if (!item) {
-    setStatus(els.status, "没有可复制的文案。", true);
+    setStatus(module.els.status, "没有可复制的文案。", true);
     return;
   }
 
-  const copiedNumber = currentIndex + 1;
+  const copiedNumber = module.index + 1;
   const ok = await copyText(item.copyText);
-  if (currentIndex < captionItems.length - 1) {
-    currentIndex += 1;
-    saveCaptionIndex();
+  if (module.index < module.items.length - 1) {
+    module.index += 1;
+    saveCaptionIndex(type);
   }
-  renderCaption();
-  setStatus(els.status, ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok, ok ? 1800 : 3500);
+  renderCaption(type);
+  setStatus(module.els.status, ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok, ok ? 1800 : 3500);
 }
 
-function prevCaption() {
-  if (currentIndex > 0) {
-    currentIndex -= 1;
-    saveCaptionIndex();
-    renderCaption();
-    setStatus(els.status, "已回到第 " + (currentIndex + 1) + " 条。");
+function prevCaption(type) {
+  const module = captionModules[type];
+  if (module.index > 0) {
+    module.index -= 1;
+    saveCaptionIndex(type);
+    renderCaption(type);
+    setStatus(module.els.status, "已回到第 " + (module.index + 1) + " 条。");
   }
 }
 
-function resetCaptionIndex() {
-  currentIndex = 0;
-  saveCaptionIndex();
-  renderCaption();
-  setStatus(els.status, "已重置到第 1 条。");
+function resetCaptionIndex(type) {
+  const module = captionModules[type];
+  module.index = 0;
+  saveCaptionIndex(type);
+  renderCaption(type);
+  setStatus(module.els.status, "已重置到第 1 条。");
 }
 
-function jumpToCaption() {
-  const target = cleanCell(els.jumpInput.value);
+function jumpToCaption(type) {
+  const module = captionModules[type];
+  const target = cleanCell(module.els.jumpInput.value);
   if (!target) {
-    setStatus(els.status, "请输入要跳转的编号。", true);
+    setStatus(module.els.status, "请输入要跳转的编号。", true);
     return;
   }
 
-  const foundIndex = captionItems.findIndex((item) => item.id === target);
+  const foundIndex = module.items.findIndex((item) => item.id === target);
   if (foundIndex === -1) {
-    setStatus(els.status, "没有找到编号 " + target + "。", true);
+    setStatus(module.els.status, "没有找到编号 " + target + "。", true);
     return;
   }
 
-  currentIndex = foundIndex;
-  saveCaptionIndex();
-  renderCaption();
-  setStatus(els.status, "已跳转到编号 " + target + "。");
+  module.index = foundIndex;
+  saveCaptionIndex(type);
+  renderCaption(type);
+  setStatus(module.els.status, "已跳转到编号 " + target + "。");
 }
 
 async function handleProductListClick(event) {
   const button = event.target.closest("[data-url]");
   if (!button) return;
-
   const ok = await copyText(button.dataset.url);
   setStatus(els.productStatus, ok ? "已复制商品链接。" : "自动复制失败，请长按链接手动复制。", !ok, ok ? 1800 : 3500);
 }
@@ -802,7 +860,6 @@ function setStatus(element, text, warning, duration) {
   element.textContent = text || "";
   element.className = warning ? "status warn" : "status";
   clearTimeout(element.statusTimer);
-
   if (text && duration !== 0) {
     element.statusTimer = setTimeout(() => {
       element.textContent = "";
