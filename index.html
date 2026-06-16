@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="文案复制器">
-<title>文案复制器</title>
+<meta name="apple-mobile-web-app-title" content="Mark 小工具">
+<title>Mark 小工具</title>
 <style>
   :root {
-    --bg: #f4f4f5;
+    --bg: #f3f4f6;
     --card: #ffffff;
-    --text: #111111;
-    --muted: #666666;
-    --line: #dddddf;
-    --soft: #eeeeef;
+    --text: #101114;
+    --muted: #70737a;
+    --line: #e1e3e8;
+    --soft: #f0f1f3;
     --primary: #111111;
-    --ok: #0a7a35;
-    --warn: #9f2a20;
+    --ok: #137a3f;
+    --warn: #a12a20;
   }
 
   * { box-sizing: border-box; }
@@ -36,32 +36,104 @@
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    padding: max(18px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .view { display: none; }
+  .view.is-active { display: block; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .backBtn {
+    width: auto;
+    min-height: 42px;
+    padding: 10px 13px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .topTitle {
+    min-width: 0;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+
+  .hero {
+    padding: 22px 2px 12px;
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.18;
+    letter-spacing: 0;
+  }
+
+  .hero p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .menuGrid {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .menuCard {
+    width: 100%;
+    min-height: 118px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    text-align: left;
+    box-shadow: 0 8px 22px rgba(16,17,20,.05);
+  }
+
+  .menuCard strong {
+    display: block;
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .menuCard span {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
   }
 
   .card {
     background: var(--card);
-    border: 1px solid #ececef;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 18px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    padding: 16px;
+    box-shadow: 0 8px 22px rgba(16,17,20,.05);
   }
 
-  .card + .card {
-    margin-top: 16px;
-  }
-
-  h1, h2 {
+  .sectionTitle {
     margin: 0 0 8px;
+    font-size: 21px;
     line-height: 1.25;
     letter-spacing: 0;
   }
 
-  h1 { font-size: 24px; }
-  h2 { font-size: 21px; }
-
   .sub {
-    margin: 0 0 16px;
+    margin: 0 0 14px;
     color: var(--muted);
     font-size: 14px;
     line-height: 1.55;
@@ -70,13 +142,13 @@
   .stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 14px 0;
+    gap: 8px;
+    margin: 12px 0;
   }
 
   .stat {
-    min-height: 72px;
-    padding: 12px;
+    min-height: 66px;
+    padding: 11px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fafafa;
@@ -85,29 +157,29 @@
   .stat span {
     display: block;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.3;
   }
 
   .stat strong {
     display: block;
     margin-top: 6px;
-    font-size: 21px;
+    font-size: 20px;
     line-height: 1.2;
     letter-spacing: 0;
   }
 
   .label {
     display: block;
-    margin: 16px 0 8px;
+    margin: 14px 0 7px;
     color: var(--muted);
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
   }
 
   textarea {
     width: 100%;
-    min-height: 168px;
+    min-height: 150px;
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 13px;
@@ -123,25 +195,25 @@
   input {
     width: 100%;
     min-width: 0;
-    height: 54px;
+    height: 52px;
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 0 12px;
     background: #fff;
     color: var(--text);
-    font-size: 17px;
+    font-size: 16px;
     outline: none;
     -webkit-appearance: none;
   }
 
   button {
     width: 100%;
-    min-height: 54px;
+    min-height: 52px;
     border: none;
     border-radius: 8px;
-    padding: 14px 16px;
-    font-size: 17px;
-    font-weight: 800;
+    padding: 13px 15px;
+    font-size: 16px;
+    font-weight: 850;
     line-height: 1.25;
     cursor: pointer;
     touch-action: manipulation;
@@ -157,8 +229,8 @@
   .secondary { background: var(--soft); color: var(--text); }
 
   .note {
-    min-height: 58px;
-    padding: 13px;
+    min-height: 54px;
+    padding: 12px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fafafa;
@@ -171,18 +243,18 @@
 
   .controls {
     display: grid;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 9px;
+    margin-top: 13px;
   }
 
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 9px;
   }
 
   .jumpBox {
-    margin-top: 14px;
+    margin-top: 13px;
     padding: 12px;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -190,31 +262,31 @@
   }
 
   .jumpTitle {
-    margin-bottom: 10px;
-    font-size: 15px;
-    font-weight: 800;
+    margin-bottom: 9px;
+    font-size: 14px;
+    font-weight: 850;
   }
 
   .jumpRow {
     display: grid;
-    grid-template-columns: 1fr 104px;
-    gap: 10px;
+    grid-template-columns: 1fr 94px;
+    gap: 9px;
     align-items: stretch;
   }
 
   .status {
-    min-height: 24px;
-    margin-top: 14px;
+    min-height: 23px;
+    margin-top: 12px;
     color: var(--ok);
     font-size: 14px;
-    font-weight: 700;
-    line-height: 1.5;
+    font-weight: 800;
+    line-height: 1.45;
   }
 
   .status.warn { color: var(--warn); }
 
   .tip {
-    margin: 10px 0 0;
+    margin: 9px 0 0;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.55;
@@ -222,23 +294,23 @@
 
   .productToolbar {
     display: grid;
-    gap: 10px;
-    margin: 14px 0;
+    gap: 9px;
+    margin: 13px 0;
   }
 
   .productList {
     display: grid;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .productItem {
     display: grid;
-    grid-template-columns: 42px 1fr 96px;
-    gap: 10px;
+    grid-template-columns: 42px 1fr 86px;
+    gap: 9px;
     align-items: center;
-    min-height: 60px;
-    padding: 10px;
+    min-height: 58px;
+    padding: 9px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
@@ -250,100 +322,122 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    background: #f0f0f1;
+    background: #f0f1f3;
     color: var(--muted);
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 850;
   }
 
   .productName {
     min-width: 0;
     color: var(--text);
     text-decoration: none;
-    font-size: 17px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 850;
     line-height: 1.35;
     overflow-wrap: anywhere;
   }
 
-  .productName:active {
-    color: var(--muted);
-  }
-
   .copyLinkBtn {
-    min-height: 42px;
-    padding: 10px 12px;
+    min-height: 40px;
+    padding: 9px 10px;
     font-size: 14px;
   }
 
   @media (max-width: 420px) {
     .page { padding-left: 12px; padding-right: 12px; }
-    .card { padding: 14px; }
     .stats, .row, .jumpRow { grid-template-columns: 1fr; }
-    .productItem {
-      grid-template-columns: 38px 1fr;
-    }
-    .copyLinkBtn {
-      grid-column: 1 / -1;
-    }
+    .productItem { grid-template-columns: 38px 1fr; }
+    .copyLinkBtn { grid-column: 1 / -1; }
   }
 </style>
 </head>
 <body>
   <main class="page">
-    <section class="card" aria-labelledby="captionTitle">
-      <h1 id="captionTitle">文案复制</h1>
-      <p class="sub">从公开 Google 表格 CSV 自动读取文案。页面会显示中文翻译/注释，但复制时只复制「可复制文案」。</p>
-
-      <div class="stats" aria-live="polite">
-        <div class="stat"><span>已读取文案数量</span><strong id="totalCount">0</strong></div>
-        <div class="stat"><span>当前进度</span><strong id="positionText">0 / 0</strong></div>
+    <section id="homeView" class="view is-active">
+      <div class="hero">
+        <h1>Mark 小工具</h1>
+        <p>选择你现在要做的事。文案和商品链接都从 Google 表格读取，刷新页面就能拿到最新内容。</p>
       </div>
 
-      <label class="label" for="preview">当前文案预览</label>
-      <textarea id="preview" readonly placeholder="正在读取表格数据..."></textarea>
+      <div class="menuGrid">
+        <button class="menuCard" type="button" data-open-view="captionView">
+          <strong>文案复制</strong>
+          <span>按顺序复制下一条文案，中文注释只显示不复制。</span>
+        </button>
 
-      <span class="label">中文翻译 / 中文注释</span>
-      <div class="note" id="note">正在读取表格数据...</div>
-
-      <div class="controls">
-        <button id="copyBtn" class="primary" type="button">复制下一条文案</button>
-        <div class="row">
-          <button id="prevBtn" class="secondary" type="button">上一条</button>
-          <button id="resetBtn" class="secondary" type="button">重置到第 1 条</button>
-        </div>
-        <button id="refreshBtn" class="secondary" type="button">刷新文案表格</button>
+        <button class="menuCard" type="button" data-open-view="productView">
+          <strong>挂车链接</strong>
+          <span>点商品名打开商品页，也可以一键复制完整商品链接。</span>
+        </button>
       </div>
-
-      <div class="jumpBox">
-        <div class="jumpTitle">跳转到指定编号</div>
-        <div class="jumpRow">
-          <input id="jumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
-          <button id="jumpBtn" class="secondary" type="button">跳转</button>
-        </div>
-      </div>
-
-      <div class="status" id="status" role="status" aria-live="polite"></div>
-      <p class="tip">如果 iPhone Safari 自动复制失败，请长按上方文本框手动复制。中文翻译/注释只用于查看，不会复制。</p>
     </section>
 
-    <section class="card" aria-labelledby="productTitle">
-      <h2 id="productTitle">挂车链接</h2>
-      <p class="sub">商品表格只需要填写「编号、商品名、PID」。网页会自动把 PID 拼成 TikTok 商品链接。</p>
-
-      <div class="stats" aria-live="polite">
-        <div class="stat"><span>已读取商品数量</span><strong id="productCount">0</strong></div>
-        <div class="stat"><span>链接前缀</span><strong>自动</strong></div>
+    <section id="captionView" class="view">
+      <div class="topbar">
+        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
+        <div class="topTitle">文案复制</div>
       </div>
 
-      <div class="productToolbar">
-        <input id="productSearch" type="search" placeholder="搜索商品名">
-        <button id="productRefreshBtn" class="secondary" type="button">刷新商品表格</button>
+      <div class="card">
+        <p class="sub">复制时只复制「可复制文案」。编号和中文注释不会进入剪贴板。</p>
+
+        <div class="stats" aria-live="polite">
+          <div class="stat"><span>已读取文案</span><strong id="totalCount">0</strong></div>
+          <div class="stat"><span>当前进度</span><strong id="positionText">0 / 0</strong></div>
+        </div>
+
+        <label class="label" for="preview">当前文案</label>
+        <textarea id="preview" readonly placeholder="正在读取表格数据..."></textarea>
+
+        <span class="label">中文翻译 / 中文注释</span>
+        <div class="note" id="note">正在读取表格数据...</div>
+
+        <div class="controls">
+          <button id="copyBtn" class="primary" type="button">复制下一条文案</button>
+          <div class="row">
+            <button id="prevBtn" class="secondary" type="button">上一条</button>
+            <button id="resetBtn" class="secondary" type="button">重置到第 1 条</button>
+          </div>
+          <button id="refreshBtn" class="secondary" type="button">刷新文案表格</button>
+        </div>
+
+        <div class="jumpBox">
+          <div class="jumpTitle">跳转到指定编号</div>
+          <div class="jumpRow">
+            <input id="jumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
+            <button id="jumpBtn" class="secondary" type="button">跳转</button>
+          </div>
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+        <p class="tip">如果 iPhone Safari 自动复制失败，请长按文案框手动复制。</p>
+      </div>
+    </section>
+
+    <section id="productView" class="view">
+      <div class="topbar">
+        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
+        <div class="topTitle">挂车链接</div>
       </div>
 
-      <div class="productList" id="productList"></div>
-      <div class="status" id="productStatus" role="status" aria-live="polite"></div>
-      <p class="tip">点商品名会打开商品页面；点「复制链接」会复制完整商品链接。</p>
+      <div class="card">
+        <p class="sub">商品表只填「编号、商品名、PID」。网页会自动补全 TikTok 商品链接。</p>
+
+        <div class="stats" aria-live="polite">
+          <div class="stat"><span>已读取商品</span><strong id="productCount">0</strong></div>
+          <div class="stat"><span>链接前缀</span><strong>自动</strong></div>
+        </div>
+
+        <div class="productToolbar">
+          <input id="productSearch" type="search" placeholder="搜索商品名">
+          <button id="productRefreshBtn" class="secondary" type="button">刷新商品表格</button>
+        </div>
+
+        <div class="productList" id="productList"></div>
+        <div class="status" id="productStatus" role="status" aria-live="polite"></div>
+        <p class="tip">点商品名打开商品页；点「复制」复制完整商品链接。</p>
+      </div>
     </section>
   </main>
 
@@ -370,6 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function cacheElements() {
+  els.views = document.querySelectorAll(".view");
   els.totalCount = document.getElementById("totalCount");
   els.positionText = document.getElementById("positionText");
   els.preview = document.getElementById("preview");
@@ -389,6 +484,10 @@ function cacheElements() {
 }
 
 function bindEvents() {
+  document.querySelectorAll("[data-open-view]").forEach((button) => {
+    button.addEventListener("click", () => showView(button.dataset.openView));
+  });
+
   els.copyBtn.addEventListener("click", copyNextCaption);
   els.prevBtn.addEventListener("click", prevCaption);
   els.resetBtn.addEventListener("click", resetCaptionIndex);
@@ -402,6 +501,11 @@ function bindEvents() {
   els.productList.addEventListener("click", handleProductListClick);
 }
 
+function showView(viewId) {
+  els.views.forEach((view) => view.classList.toggle("is-active", view.id === viewId));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function loadCaptionIndex() {
   const saved = parseInt(localStorage.getItem(CAPTION_STORAGE_KEY) || "0", 10);
   currentIndex = Number.isFinite(saved) && saved >= 0 ? saved : 0;
@@ -412,21 +516,12 @@ function saveCaptionIndex() {
 }
 
 async function loadCaptionSheet(forceRefresh) {
-  if (!isReadyUrl(CAPTION_SHEET_CSV_URL)) {
-    captionItems = [];
-    currentIndex = 0;
-    renderCaption();
-    setStatus(els.status, "请先填写文案表格 CSV 链接。", true, 0);
-    return;
-  }
-
   isCaptionLoading = true;
   renderCaption();
   setStatus(els.status, forceRefresh ? "正在刷新文案表格..." : "正在读取文案表格...", false, 0);
 
   try {
-    const csvText = await fetchCsv(CAPTION_SHEET_CSV_URL, forceRefresh);
-    captionItems = parseCaptionCsv(csvText);
+    captionItems = parseCaptionCsv(await fetchCsv(CAPTION_SHEET_CSV_URL, forceRefresh));
     if (currentIndex >= captionItems.length) currentIndex = Math.max(captionItems.length - 1, 0);
     saveCaptionIndex();
     setStatus(els.status, "已读取 " + captionItems.length + " 条文案。");
@@ -441,20 +536,12 @@ async function loadCaptionSheet(forceRefresh) {
 }
 
 async function loadProductSheet(forceRefresh) {
-  if (!isReadyUrl(PRODUCT_SHEET_CSV_URL)) {
-    productItems = [];
-    renderProducts();
-    setStatus(els.productStatus, "请先填写挂车商品 CSV 链接。字段为：编号、商品名、PID。", true, 0);
-    return;
-  }
-
   isProductLoading = true;
   renderProducts();
   setStatus(els.productStatus, forceRefresh ? "正在刷新商品表格..." : "正在读取商品表格...", false, 0);
 
   try {
-    const csvText = await fetchCsv(PRODUCT_SHEET_CSV_URL, forceRefresh);
-    productItems = parseProductCsv(csvText);
+    productItems = parseProductCsv(await fetchCsv(PRODUCT_SHEET_CSV_URL, forceRefresh));
     setStatus(els.productStatus, "已读取 " + productItems.length + " 个商品。");
   } catch (error) {
     productItems = [];
@@ -463,10 +550,6 @@ async function loadProductSheet(forceRefresh) {
     isProductLoading = false;
     renderProducts();
   }
-}
-
-function isReadyUrl(url) {
-  return url && !url.includes("这里填写");
 }
 
 async function fetchCsv(url, forceRefresh) {
@@ -479,7 +562,6 @@ async function fetchCsv(url, forceRefresh) {
 function parseCaptionCsv(csvText) {
   const rows = parseCsv(csvText);
   if (!rows.length) return [];
-
   const headers = rows[0].map((cell) => cleanCell(cell));
   const idIndex = headers.indexOf("编号");
   const copyIndex = headers.indexOf("可复制文案");
@@ -501,7 +583,6 @@ function parseCaptionCsv(csvText) {
 function parseProductCsv(csvText) {
   const rows = parseCsv(csvText);
   if (!rows.length) return [];
-
   const headers = rows[0].map((cell) => cleanCell(cell).toUpperCase());
   const idIndex = headers.indexOf("编号");
   const nameIndex = headers.indexOf("商品名");
@@ -531,7 +612,6 @@ function parseCsv(text) {
   for (let i = 0; i < text.length; i += 1) {
     const char = text[i];
     const next = text[i + 1];
-
     if (char === '"') {
       if (inQuotes && next === '"') {
         cell += '"';
@@ -541,13 +621,11 @@ function parseCsv(text) {
       }
       continue;
     }
-
     if (char === "," && !inQuotes) {
       row.push(cell);
       cell = "";
       continue;
     }
-
     if ((char === "\n" || char === "\r") && !inQuotes) {
       if (char === "\r" && next === "\n") i += 1;
       row.push(cell);
@@ -556,7 +634,6 @@ function parseCsv(text) {
       cell = "";
       continue;
     }
-
     cell += char;
   }
 
@@ -581,7 +658,6 @@ function renderCaption() {
   const total = captionItems.length;
   const item = captionItems[currentIndex];
   const visibleIndex = total ? currentIndex + 1 : 0;
-
   els.totalCount.textContent = String(total);
   els.positionText.textContent = visibleIndex + " / " + total;
   els.jumpInput.max = String(Math.max(total, 1));
@@ -608,7 +684,6 @@ function renderCaption() {
 function renderProducts() {
   const keyword = els.productSearch.value.trim().toLowerCase();
   const filtered = productItems.filter((item) => item.name.toLowerCase().includes(keyword));
-
   els.productCount.textContent = String(productItems.length);
   els.productRefreshBtn.disabled = isProductLoading;
 
@@ -622,15 +697,13 @@ function renderProducts() {
     return;
   }
 
-  els.productList.innerHTML = filtered.map((item) => {
-    return [
-      '<div class="productItem">',
-      '<span class="productNo">' + escapeHtml(item.id) + '</span>',
-      '<a class="productName" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.name) + '</a>',
-      '<button class="secondary copyLinkBtn" type="button" data-url="' + escapeHtml(item.url) + '">复制链接</button>',
-      '</div>'
-    ].join("");
-  }).join("");
+  els.productList.innerHTML = filtered.map((item) => [
+    '<div class="productItem">',
+    '<span class="productNo">' + escapeHtml(item.id) + '</span>',
+    '<a class="productName" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.name) + '</a>',
+    '<button class="secondary copyLinkBtn" type="button" data-url="' + escapeHtml(item.url) + '">复制</button>',
+    '</div>'
+  ].join("")).join("");
 }
 
 async function copyNextCaption() {
@@ -642,14 +715,12 @@ async function copyNextCaption() {
 
   const copiedNumber = currentIndex + 1;
   const ok = await copyText(item.copyText);
-
   if (currentIndex < captionItems.length - 1) {
     currentIndex += 1;
     saveCaptionIndex();
   }
-
   renderCaption();
-  setStatus(els.status, ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文本框手动复制。", !ok, ok ? 1800 : 3500);
+  setStatus(els.status, ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok, ok ? 1800 : 3500);
 }
 
 function prevCaption() {
@@ -704,7 +775,6 @@ async function copyText(text) {
       return fallbackCopy(text);
     }
   }
-
   return fallbackCopy(text);
 }
 
