@@ -1,881 +1,1018 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mark 小工具">
-<title>Mark 小工具</title>
-<style>
-  :root {
-    --bg: #f3f4f6;
-    --card: #ffffff;
-    --text: #101114;
-    --muted: #70737a;
-    --line: #e1e3e8;
-    --soft: #f0f1f3;
-    --primary: #111111;
-    --ok: #137a3f;
-    --warn: #a12a20;
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mark 的个人小工具">
+  <title>Mark 的个人小工具</title>
+  <style>
+    :root {
+      --bg: #eef4fb;
+      --panel: rgba(255, 255, 255, .88);
+      --panel-strong: #ffffff;
+      --text: #101828;
+      --muted: #64748b;
+      --line: rgba(156, 178, 207, .42);
+      --blue: #1268ff;
+      --navy: #0b1f55;
+      --soft: #f3f7fc;
+      --dark: #101828;
+      --note: #fff4cf;
+      --ok: #047857;
+      --warn: #b42318;
+    }
 
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 4%, rgba(65, 190, 255, .34), transparent 26%),
+        radial-gradient(circle at 88% 18%, rgba(18, 104, 255, .24), transparent 26%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
 
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-  }
+    button, select, input, textarea { font: inherit; }
 
-  button, input, textarea { font: inherit; }
+    .page {
+      width: 100%;
+      max-width: 760px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 14px max(26px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+    }
 
-  .page {
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: max(18px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
-  }
+    .shell { width: 100%; }
 
-  .view { display: none; }
-  .view.is-active { display: block; }
+    .hero, .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, .86);
+      border-radius: 22px;
+      box-shadow: 0 22px 60px rgba(16, 43, 92, .14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
 
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      margin-bottom: 14px;
+    }
 
-  .backBtn {
-    width: auto;
-    min-height: 42px;
-    padding: 10px 13px;
-    border: 1px solid var(--line);
-    background: #fff;
-    color: var(--text);
-    font-size: 15px;
-  }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -120px;
+      top: -130px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(18,104,255,.22), transparent 68%);
+      pointer-events: none;
+    }
 
-  .topTitle {
-    min-width: 0;
-    font-size: 20px;
-    font-weight: 900;
-    line-height: 1.2;
-  }
+    .brand {
+      position: relative;
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
 
-  .hero {
-    padding: 22px 2px 12px;
-  }
+    .logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #101828, #123a8c);
+      color: #fff;
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(16, 43, 92, .24);
+    }
 
-  .hero h1 {
-    margin: 0;
-    font-size: 28px;
-    line-height: 1.18;
-    letter-spacing: 0;
-  }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: 25px; line-height: 1.2; letter-spacing: 0; }
+    h2 { font-size: 25px; line-height: 1.25; letter-spacing: 0; }
 
-  .hero p {
-    margin: 10px 0 0;
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.55;
-  }
+    .eyebrow {
+      margin-top: 4px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
 
-  .menuGrid {
-    display: grid;
-    gap: 12px;
-    margin-top: 16px;
-  }
+    .sub {
+      position: relative;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
 
-  .menuCard {
-    width: 100%;
-    min-height: 108px;
-    padding: 18px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--card);
-    color: var(--text);
-    text-align: left;
-    box-shadow: 0 8px 22px rgba(16,17,20,.05);
-  }
+    .archiveTag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      margin-top: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(18, 104, 255, .10);
+      color: #1647a8;
+      font-size: 12px;
+      font-weight: 900;
+    }
 
-  .menuCard strong {
-    display: block;
-    font-size: 21px;
-    line-height: 1.25;
-  }
+    .modeGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
 
-  .menuCard span {
-    display: block;
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.45;
-    font-weight: 500;
-  }
+    .modeBtn {
+      min-height: 74px;
+      padding: 14px 16px;
+      text-align: left;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      color: var(--text);
+      border-radius: 16px;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(16, 43, 92, .08);
+    }
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 8px 22px rgba(16,17,20,.05);
-  }
+    .modeBtn span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-  .sub {
-    margin: 0 0 14px;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.55;
-  }
+    .panel {
+      display: none;
+      padding: 18px;
+    }
 
-  .stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin: 12px 0;
-  }
+    .panel.active { display: block; }
 
-  .stat {
-    min-height: 66px;
-    padding: 11px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #fafafa;
-  }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
 
-  .stat span {
-    display: block;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.3;
-  }
+    .backBtn {
+      width: auto;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 13px;
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-size: 15px;
+      font-weight: 900;
+    }
 
-  .stat strong {
-    display: block;
-    margin-top: 6px;
-    font-size: 20px;
-    line-height: 1.2;
-    letter-spacing: 0;
-  }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
 
-  .label {
-    display: block;
-    margin: 14px 0 7px;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 800;
-  }
+    .stat {
+      min-height: 76px;
+      padding: 11px 8px;
+      border-radius: 15px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
 
-  textarea {
-    width: 100%;
-    min-height: 145px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 13px;
-    background: #fff;
-    color: var(--text);
-    font-size: 16px;
-    line-height: 1.5;
-    resize: vertical;
-    outline: none;
-    -webkit-appearance: none;
-  }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
 
-  input {
-    width: 100%;
-    min-width: 0;
-    height: 52px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 0 12px;
-    background: #fff;
-    color: var(--text);
-    font-size: 16px;
-    outline: none;
-    -webkit-appearance: none;
-  }
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 22px;
+      line-height: 1;
+    }
 
-  button {
-    width: 100%;
-    min-height: 52px;
-    border: none;
-    border-radius: 8px;
-    padding: 13px 15px;
-    font-size: 16px;
-    font-weight: 850;
-    line-height: 1.25;
-    cursor: pointer;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
+    button, select, input, textarea {
+      border-radius: 15px;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  button:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-  }
+    button, select, input {
+      min-height: 54px;
+    }
 
-  .primary { background: var(--primary); color: #fff; }
-  .secondary { background: var(--soft); color: var(--text); }
+    button {
+      width: 100%;
+      border: 0;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 900;
+    }
 
-  .note, .metaBox {
-    min-height: 54px;
-    padding: 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #fafafa;
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1.55;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
+    button:disabled { opacity: .48; cursor: not-allowed; }
+    .primary { background: linear-gradient(135deg, #101828, #1647a8); color: #fff; box-shadow: 0 16px 30px rgba(16, 43, 92, .22); }
+    .secondary { background: var(--soft); color: var(--text); border: 1px solid var(--line); }
 
-  .controls {
-    display: grid;
-    gap: 9px;
-    margin-top: 13px;
-  }
+    select, input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 0 13px;
+      font-size: 16px;
+      outline: none;
+    }
 
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 9px;
-  }
+    textarea {
+      width: 100%;
+      min-height: 154px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 14px;
+      font-size: 16px;
+      line-height: 1.55;
+      outline: none;
+      resize: vertical;
+      -webkit-appearance: none;
+    }
 
-  .jumpBox {
-    margin-top: 13px;
-    padding: 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #fafafa;
-  }
+    .fieldLabel {
+      display: block;
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
 
-  .jumpTitle {
-    margin-bottom: 9px;
-    font-size: 14px;
-    font-weight: 850;
-  }
+    .result {
+      display: block;
+      margin-top: 14px;
+    }
 
-  .jumpRow {
-    display: grid;
-    grid-template-columns: 1fr 94px;
-    gap: 9px;
-    align-items: stretch;
-  }
+    .copyText {
+      padding: 15px;
+      border-radius: 17px;
+      background: linear-gradient(145deg, #101828, #0b1f55);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      user-select: text;
+    }
 
-  .status {
-    min-height: 23px;
-    margin-top: 12px;
-    color: var(--ok);
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1.45;
-  }
+    .note {
+      margin-top: 10px;
+      padding: 13px;
+      border-radius: 15px;
+      background: var(--note);
+      color: #533f04;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
 
-  .status.warn { color: var(--warn); }
+    .meta {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
 
-  .tip {
-    margin: 9px 0 0;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.55;
-  }
+    .status {
+      min-height: 22px;
+      margin-top: 12px;
+      color: var(--ok);
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
 
-  .productToolbar {
-    display: grid;
-    gap: 9px;
-    margin: 13px 0;
-  }
+    .status.warn { color: var(--warn); }
 
-  .productList {
-    display: grid;
-    gap: 8px;
-    margin-top: 10px;
-  }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
 
-  .productItem {
-    display: grid;
-    grid-template-columns: 42px 1fr 86px;
-    gap: 9px;
-    align-items: center;
-    min-height: 58px;
-    padding: 9px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: #fff;
-  }
+    .jumpBox {
+      margin-top: 14px;
+      padding: 13px;
+      border-radius: 15px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
 
-  .productNo {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: #f0f1f3;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 850;
-  }
+    .jumpRow {
+      display: grid;
+      grid-template-columns: 1fr 104px;
+      gap: 10px;
+    }
 
-  .productName {
-    min-width: 0;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 850;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-  }
+    .linkTools {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+    }
 
-  .copyLinkBtn {
-    min-height: 40px;
-    padding: 9px 10px;
-    font-size: 14px;
-  }
+    .linkList {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
 
-  @media (max-width: 420px) {
-    .page { padding-left: 12px; padding-right: 12px; }
-    .stats, .row, .jumpRow { grid-template-columns: 1fr; }
-    .productItem { grid-template-columns: 38px 1fr; }
-    .copyLinkBtn { grid-column: 1 / -1; }
-  }
-</style>
+    .productLink {
+      display: block;
+      padding: 15px;
+      border-radius: 17px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
+    }
+
+    .productLink strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .productLink span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      padding: 16px;
+      border-radius: 15px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    @media (min-width: 560px) {
+      .modeGrid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 380px) {
+      .page { padding-left: 10px; padding-right: 10px; }
+      .hero, .panel { border-radius: 17px; padding: 15px; }
+      .stats, .row, .jumpRow { grid-template-columns: 1fr; }
+      h1 { font-size: 22px; }
+      h2 { font-size: 23px; }
+    }
+  </style>
 </head>
 <body>
   <main class="page">
-    <section id="homeView" class="view is-active">
-      <div class="hero">
-        <h1>Mark 小工具</h1>
-        <p>选择当前任务。所有内容都从 Google 表格读取，刷新后自动拿最新数据。</p>
-      </div>
-
-      <div class="menuGrid">
-        <button class="menuCard" type="button" data-open-view="dailyView">
-          <strong>日常发布</strong>
-          <span>复制日常文案，显示中文注释，不管使用时间。</span>
-        </button>
-
-        <button class="menuCard" type="button" data-open-view="cartCaptionView">
-          <strong>挂车发布</strong>
-          <span>显示商品名和中文注释，复制时只复制文案。</span>
-        </button>
-
-        <button class="menuCard" type="button" data-open-view="productView">
-          <strong>挂车链接</strong>
-          <span>点商品名打开商品页，也可以复制完整商品链接。</span>
-        </button>
-      </div>
-    </section>
-
-    <section id="dailyView" class="view">
-      <div class="topbar">
-        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
-        <div class="topTitle">日常发布</div>
-      </div>
-      <div class="card">
-        <p class="sub">按顺序复制日常文案。中文注释只显示，不会复制。</p>
-        <div class="stats" aria-live="polite">
-          <div class="stat"><span>已读取文案</span><strong id="dailyTotal">0</strong></div>
-          <div class="stat"><span>当前进度</span><strong id="dailyPosition">0 / 0</strong></div>
-        </div>
-        <label class="label" for="dailyPreview">当前文案</label>
-        <textarea id="dailyPreview" readonly placeholder="正在读取表格数据..."></textarea>
-        <span class="label">中文注释</span>
-        <div class="note" id="dailyNote">正在读取表格数据...</div>
-        <div class="controls">
-          <button id="dailyCopyBtn" class="primary" type="button">复制下一条文案</button>
-          <div class="row">
-            <button id="dailyPrevBtn" class="secondary" type="button">上一条</button>
-            <button id="dailyResetBtn" class="secondary" type="button">重置到第 1 条</button>
+    <div class="shell">
+      <section id="homeView" class="hero">
+        <div class="brand">
+          <div class="logo">M</div>
+          <div>
+            <h1>Mark 的个人小工具</h1>
           </div>
-          <button id="dailyRefreshBtn" class="secondary" type="button">刷新日常发布</button>
+        </div>
+        <div class="modeGrid">
+          <button class="modeBtn" type="button" data-view="dailyView">日常发布<span>复制日常文案</span></button>
+          <button class="modeBtn" type="button" data-view="cartView">挂车发布<span>按商品选择文案并复制</span></button>
+          <button class="modeBtn" type="button" data-view="linkView">挂车链接<span>搜索并打开商品页面</span></button>
+        </div>
+      </section>
+
+      <section id="dailyView" class="panel">
+        <div class="topbar">
+          <button class="backBtn" type="button" data-view="homeView">返回</button>
+          <h2>日常发布</h2>
+        </div>
+        <button id="dailyRefreshBtn" class="secondary" type="button">刷新数据</button>
+        <div class="stats">
+          <div class="stat"><span>总文案</span><strong id="dailyTotal">0</strong></div>
+          <div class="stat"><span>当前</span><strong id="dailyCurrent">0</strong></div>
+          <div class="stat"><span>进度</span><strong id="dailyProgress">0/0</strong></div>
+        </div>
+        <button id="dailyCopyBtn" class="primary" type="button">复制下一条</button>
+        <div class="row">
+          <button id="dailyPrevBtn" class="secondary" type="button">上一条</button>
+          <button id="dailyResetBtn" class="secondary" type="button">重置</button>
         </div>
         <div class="jumpBox">
-          <div class="jumpTitle">跳转到指定编号</div>
+          <span class="fieldLabel">跳转到指定编号</span>
           <div class="jumpRow">
             <input id="dailyJumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
             <button id="dailyJumpBtn" class="secondary" type="button">跳转</button>
           </div>
         </div>
-        <div class="status" id="dailyStatus" role="status" aria-live="polite"></div>
-      </div>
-    </section>
+        <div id="dailyResult" class="result">
+          <span class="fieldLabel">当前文案</span>
+          <textarea id="dailyCopyText" readonly></textarea>
+          <span class="fieldLabel">中文注释</span>
+          <div id="dailyCnNote" class="note"></div>
+          <div id="dailyMeta" class="meta"></div>
+        </div>
+        <div id="dailyStatus" class="status" role="status" aria-live="polite"></div>
+      </section>
 
-    <section id="cartCaptionView" class="view">
-      <div class="topbar">
-        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
-        <div class="topTitle">挂车发布</div>
-      </div>
-      <div class="card">
-        <p class="sub">挂车文案会显示商品名，但复制时只复制「可复制文案」。</p>
-        <div class="stats" aria-live="polite">
-          <div class="stat"><span>已读取文案</span><strong id="cartTotal">0</strong></div>
-          <div class="stat"><span>当前进度</span><strong id="cartPosition">0 / 0</strong></div>
+      <section id="cartView" class="panel">
+        <div class="topbar">
+          <button class="backBtn" type="button" data-view="homeView">返回</button>
+          <h2>挂车发布</h2>
         </div>
-        <span class="label">商品名</span>
-        <div class="metaBox" id="cartProductName">正在读取表格数据...</div>
-        <label class="label" for="cartPreview">当前文案</label>
-        <textarea id="cartPreview" readonly placeholder="正在读取表格数据..."></textarea>
-        <span class="label">中文注释</span>
-        <div class="note" id="cartNote">正在读取表格数据...</div>
-        <div class="controls">
-          <button id="cartCopyBtn" class="primary" type="button">复制下一条文案</button>
-          <div class="row">
-            <button id="cartPrevBtn" class="secondary" type="button">上一条</button>
-            <button id="cartResetBtn" class="secondary" type="button">重置到第 1 条</button>
-          </div>
-          <button id="cartRefreshBtn" class="secondary" type="button">刷新挂车发布</button>
+        <button id="cartRefreshBtn" class="secondary" type="button">刷新数据</button>
+        <label class="fieldLabel" for="cartProductSelect">请选择商品</label>
+        <select id="cartProductSelect"></select>
+        <div class="stats">
+          <div class="stat"><span>商品文案</span><strong id="cartTotal">0</strong></div>
+          <div class="stat"><span>当前</span><strong id="cartCurrent">0</strong></div>
+          <div class="stat"><span>进度</span><strong id="cartProgress">0/0</strong></div>
         </div>
-        <div class="jumpBox">
-          <div class="jumpTitle">跳转到指定编号</div>
-          <div class="jumpRow">
-            <input id="cartJumpInput" type="number" inputmode="numeric" min="1" placeholder="输入编号">
-            <button id="cartJumpBtn" class="secondary" type="button">跳转</button>
-          </div>
+        <button id="cartCopyBtn" class="primary" type="button">复制下一条</button>
+        <div class="row">
+          <button id="cartPrevBtn" class="secondary" type="button">上一条</button>
+          <button id="cartResetBtn" class="secondary" type="button">重置</button>
         </div>
-        <div class="status" id="cartStatus" role="status" aria-live="polite"></div>
-      </div>
-    </section>
+        <div id="cartResult" class="result">
+          <span class="fieldLabel">当前文案</span>
+          <textarea id="cartCopyText" readonly></textarea>
+          <span class="fieldLabel">中文注释</span>
+          <div id="cartCnNote" class="note"></div>
+          <div id="cartMeta" class="meta"></div>
+        </div>
+        <div id="cartStatus" class="status" role="status" aria-live="polite"></div>
+      </section>
 
-    <section id="productView" class="view">
-      <div class="topbar">
-        <button class="backBtn" type="button" data-open-view="homeView">返回</button>
-        <div class="topTitle">挂车链接</div>
-      </div>
-      <div class="card">
-        <p class="sub">商品表只填「编号、商品名、PID」。网页会自动补全 TikTok 商品链接。</p>
-        <div class="stats" aria-live="polite">
-          <div class="stat"><span>已读取商品</span><strong id="productCount">0</strong></div>
-          <div class="stat"><span>链接前缀</span><strong>自动</strong></div>
+      <section id="linkView" class="panel">
+        <div class="topbar">
+          <button class="backBtn" type="button" data-view="homeView">返回</button>
+          <h2>挂车链接</h2>
         </div>
-        <div class="productToolbar">
-          <input id="productSearch" type="search" placeholder="搜索商品名">
-          <button id="productRefreshBtn" class="secondary" type="button">刷新挂车链接</button>
+        <div class="linkTools">
+          <button id="linkRefreshBtn" class="primary" type="button">刷新挂车链接</button>
+          <input id="linkSearchInput" type="search" placeholder="搜索商品名">
         </div>
-        <div class="productList" id="productList"></div>
-        <div class="status" id="productStatus" role="status" aria-live="polite"></div>
-        <p class="tip">点商品名打开商品页；点「复制」复制完整商品链接。</p>
-      </div>
-    </section>
+        <div class="stats">
+          <div class="stat"><span>全部商品</span><strong id="linkTotal">0</strong></div>
+          <div class="stat"><span>搜索结果</span><strong id="linkVisible">0</strong></div>
+          <div class="stat"><span>跳转方式</span><strong>直达</strong></div>
+        </div>
+        <div id="linkList" class="linkList"></div>
+        <div id="linkStatus" class="status" role="status" aria-live="polite"></div>
+      </section>
+    </div>
   </main>
 
-<script>
-const DAILY_CAPTION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
-const CART_CAPTION_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=512170271&single=true&output=csv";
-const PRODUCT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
-const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
+  <script>
+    const DAILY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
+    const CART_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=512170271&single=true&output=csv";
+    const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
+    const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
+    const STORAGE_PREFIX = "mark_tools_google_sheet_v1_";
 
-const captionModules = {
-  daily: { url: DAILY_CAPTION_CSV_URL, storageKey: "daily_caption_index_v2", items: [], index: 0, loading: false },
-  cart: { url: CART_CAPTION_CSV_URL, storageKey: "cart_caption_index_v2", items: [], index: 0, loading: false }
-};
+    const state = {
+      daily: { items: [], index: 0, loading: false },
+      cart: { items: [], indexByProduct: {}, currentProduct: "", loading: false },
+      links: { items: [], loading: false }
+    };
 
-let productItems = [];
-let isProductLoading = false;
-const els = {};
+    const els = {};
 
-document.addEventListener("DOMContentLoaded", () => {
-  cacheElements();
-  bindEvents();
-  initCaptionModule("daily");
-  initCaptionModule("cart");
-  loadCaptionSheet("daily", false);
-  loadCaptionSheet("cart", false);
-  loadProductSheet(false);
-});
-
-function cacheElements() {
-  els.views = document.querySelectorAll(".view");
-  cacheCaptionEls("daily");
-  cacheCaptionEls("cart");
-  els.productCount = document.getElementById("productCount");
-  els.productSearch = document.getElementById("productSearch");
-  els.productRefreshBtn = document.getElementById("productRefreshBtn");
-  els.productList = document.getElementById("productList");
-  els.productStatus = document.getElementById("productStatus");
-}
-
-function cacheCaptionEls(type) {
-  const module = captionModules[type];
-  module.els = {
-    total: document.getElementById(type + "Total"),
-    position: document.getElementById(type + "Position"),
-    preview: document.getElementById(type + "Preview"),
-    note: document.getElementById(type + "Note"),
-    productName: document.getElementById(type + "ProductName"),
-    copyBtn: document.getElementById(type + "CopyBtn"),
-    prevBtn: document.getElementById(type + "PrevBtn"),
-    resetBtn: document.getElementById(type + "ResetBtn"),
-    refreshBtn: document.getElementById(type + "RefreshBtn"),
-    jumpInput: document.getElementById(type + "JumpInput"),
-    jumpBtn: document.getElementById(type + "JumpBtn"),
-    status: document.getElementById(type + "Status")
-  };
-}
-
-function bindEvents() {
-  document.querySelectorAll("[data-open-view]").forEach((button) => {
-    button.addEventListener("click", () => showView(button.dataset.openView));
-  });
-
-  bindCaptionEvents("daily");
-  bindCaptionEvents("cart");
-  els.productRefreshBtn.addEventListener("click", () => loadProductSheet(true));
-  els.productSearch.addEventListener("input", renderProducts);
-  els.productList.addEventListener("click", handleProductListClick);
-}
-
-function bindCaptionEvents(type) {
-  const module = captionModules[type];
-  module.els.copyBtn.addEventListener("click", () => copyNextCaption(type));
-  module.els.prevBtn.addEventListener("click", () => prevCaption(type));
-  module.els.resetBtn.addEventListener("click", () => resetCaptionIndex(type));
-  module.els.refreshBtn.addEventListener("click", () => loadCaptionSheet(type, true));
-  module.els.jumpBtn.addEventListener("click", () => jumpToCaption(type));
-  module.els.jumpInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") jumpToCaption(type);
-  });
-}
-
-function showView(viewId) {
-  els.views.forEach((view) => view.classList.toggle("is-active", view.id === viewId));
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function initCaptionModule(type) {
-  const module = captionModules[type];
-  const saved = parseInt(localStorage.getItem(module.storageKey) || "0", 10);
-  module.index = Number.isFinite(saved) && saved >= 0 ? saved : 0;
-}
-
-function saveCaptionIndex(type) {
-  const module = captionModules[type];
-  localStorage.setItem(module.storageKey, String(module.index));
-}
-
-async function loadCaptionSheet(type, forceRefresh) {
-  const module = captionModules[type];
-  module.loading = true;
-  renderCaption(type);
-  setStatus(module.els.status, forceRefresh ? "正在刷新表格..." : "正在读取表格...", false, 0);
-
-  try {
-    module.items = parseCaptionCsv(await fetchCsv(module.url, forceRefresh), type === "cart");
-    if (module.index >= module.items.length) module.index = Math.max(module.items.length - 1, 0);
-    saveCaptionIndex(type);
-    setStatus(module.els.status, "已读取 " + module.items.length + " 条文案。");
-  } catch (error) {
-    module.items = [];
-    module.index = 0;
-    setStatus(module.els.status, "读取失败，请检查 CSV 链接和字段名。", true, 0);
-  } finally {
-    module.loading = false;
-    renderCaption(type);
-  }
-}
-
-async function loadProductSheet(forceRefresh) {
-  isProductLoading = true;
-  renderProducts();
-  setStatus(els.productStatus, forceRefresh ? "正在刷新商品表格..." : "正在读取商品表格...", false, 0);
-
-  try {
-    productItems = parseProductCsv(await fetchCsv(PRODUCT_SHEET_CSV_URL, forceRefresh));
-    setStatus(els.productStatus, "已读取 " + productItems.length + " 个商品。");
-  } catch (error) {
-    productItems = [];
-    setStatus(els.productStatus, "商品读取失败，请检查 CSV 链接和字段名。", true, 0);
-  } finally {
-    isProductLoading = false;
-    renderProducts();
-  }
-}
-
-async function fetchCsv(url, forceRefresh) {
-  const finalUrl = forceRefresh ? url + (url.includes("?") ? "&" : "?") + "t=" + Date.now() : url;
-  const res = await fetch(finalUrl, { cache: "no-store" });
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  return res.text();
-}
-
-function parseCaptionCsv(csvText, hasProductName) {
-  const rows = parseCsv(csvText);
-  if (!rows.length) return [];
-
-  const headers = rows[0].map((cell) => cleanCell(cell));
-  const idIndex = findHeader(headers, ["排序编号", "编号"]);
-  const productIndex = findHeader(headers, ["商品名称", "商品名"]);
-  const copyIndex = findHeader(headers, ["可复制文案"]);
-  const noteIndex = findHeader(headers, ["中文注释"]);
-  if (copyIndex === -1 || noteIndex === -1) throw new Error("CSV 缺少必要字段");
-
-  return rows.slice(1).reduce((result, row, rowIndex) => {
-    const copyText = cleanCell(row[copyIndex]);
-    if (isEmptyRow(row) || !copyText) return result;
-    result.push({
-      id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
-      productName: hasProductName && productIndex >= 0 ? cleanCell(row[productIndex]) : "",
-      copyText,
-      note: cleanCell(row[noteIndex])
+    document.addEventListener("DOMContentLoaded", () => {
+      cacheElements();
+      bindEvents();
+      hydrateState();
+      showView("homeView");
+      loadDaily(false);
+      loadCart(false);
+      loadLinks(false);
     });
-    return result;
-  }, []);
-}
 
-function parseProductCsv(csvText) {
-  const rows = parseCsv(csvText);
-  if (!rows.length) return [];
+    function cacheElements() {
+      [
+        "homeView", "dailyView", "cartView", "linkView",
+        "dailyRefreshBtn", "dailyCopyBtn", "dailyPrevBtn", "dailyResetBtn", "dailyJumpInput", "dailyJumpBtn",
+        "dailyTotal", "dailyCurrent", "dailyProgress", "dailyCopyText", "dailyCnNote", "dailyMeta", "dailyStatus",
+        "cartRefreshBtn", "cartProductSelect", "cartCopyBtn", "cartPrevBtn", "cartResetBtn",
+        "cartTotal", "cartCurrent", "cartProgress", "cartCopyText", "cartCnNote", "cartMeta", "cartStatus",
+        "linkRefreshBtn", "linkSearchInput", "linkTotal", "linkVisible", "linkList", "linkStatus"
+      ].forEach((id) => { els[id] = document.getElementById(id); });
+    }
 
-  const headers = rows[0].map((cell) => cleanCell(cell).toUpperCase());
-  const idIndex = headers.indexOf("编号");
-  const nameIndex = headers.indexOf("商品名");
-  const pidIndex = headers.indexOf("PID");
-  if (nameIndex === -1 || pidIndex === -1) throw new Error("CSV 缺少必要字段");
+    function bindEvents() {
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => showView(button.dataset.view));
+      });
 
-  return rows.slice(1).reduce((result, row, rowIndex) => {
-    const name = cleanCell(row[nameIndex]);
-    const pid = cleanPid(row[pidIndex]);
-    if (isEmptyRow(row) || !name || !pid) return result;
-    result.push({
-      id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
-      name,
-      pid,
-      url: PRODUCT_URL_PREFIX + pid
-    });
-    return result;
-  }, []);
-}
+      els.dailyRefreshBtn.addEventListener("click", () => loadDaily(true));
+      els.dailyCopyBtn.addEventListener("click", copyDailyNext);
+      els.dailyPrevBtn.addEventListener("click", () => moveDaily(-1));
+      els.dailyResetBtn.addEventListener("click", resetDaily);
+      els.dailyJumpBtn.addEventListener("click", jumpDaily);
+      els.dailyJumpInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") jumpDaily();
+      });
 
-function findHeader(headers, names) {
-  return headers.findIndex((header) => names.includes(header));
-}
+      els.cartRefreshBtn.addEventListener("click", () => loadCart(true));
+      els.cartProductSelect.addEventListener("change", () => {
+        state.cart.currentProduct = els.cartProductSelect.value;
+        save("cart_product", state.cart.currentProduct);
+        renderCart();
+      });
+      els.cartCopyBtn.addEventListener("click", copyCartNext);
+      els.cartPrevBtn.addEventListener("click", () => moveCart(-1));
+      els.cartResetBtn.addEventListener("click", resetCart);
 
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let inQuotes = false;
+      els.linkRefreshBtn.addEventListener("click", () => loadLinks(true));
+      els.linkSearchInput.addEventListener("input", renderLinks);
+    }
 
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    const next = text[i + 1];
-    if (char === '"') {
-      if (inQuotes && next === '"') {
-        cell += '"';
-        i += 1;
-      } else {
-        inQuotes = !inQuotes;
+    function hydrateState() {
+      state.daily.index = readNumber("daily_index", 0);
+      state.cart.indexByProduct = readJson("cart_index_by_product", {});
+      state.cart.currentProduct = readText("cart_product", "");
+    }
+
+    function showView(viewId) {
+      ["homeView", "dailyView", "cartView", "linkView"].forEach((id) => {
+        if (id === "homeView") {
+          els[id].style.display = id === viewId ? "block" : "none";
+        } else {
+          els[id].classList.toggle("active", id === viewId);
+        }
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function loadDaily(forceRefresh) {
+      state.daily.loading = true;
+      renderDaily();
+      setStatus(els.dailyStatus, forceRefresh ? "正在刷新日常发布..." : "正在读取日常发布...", false, 0);
+
+      try {
+        state.daily.items = parseCaptionCsv(await fetchCsv(DAILY_CSV_URL, forceRefresh), false);
+        if (state.daily.index >= state.daily.items.length) state.daily.index = Math.max(state.daily.items.length - 1, 0);
+        save("daily_index", state.daily.index);
+        setStatus(els.dailyStatus, "已读取 " + state.daily.items.length + " 条日常文案。");
+      } catch (error) {
+        state.daily.items = [];
+        state.daily.index = 0;
+        setStatus(els.dailyStatus, "日常发布读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        state.daily.loading = false;
+        renderDaily();
       }
-      continue;
     }
-    if (char === "," && !inQuotes) {
-      row.push(cell);
-      cell = "";
-      continue;
+
+    async function loadCart(forceRefresh) {
+      state.cart.loading = true;
+      renderCart();
+      setStatus(els.cartStatus, forceRefresh ? "正在刷新挂车发布..." : "正在读取挂车发布...", false, 0);
+
+      try {
+        state.cart.items = parseCaptionCsv(await fetchCsv(CART_CSV_URL, forceRefresh), true);
+        initCartProducts();
+        setStatus(els.cartStatus, "已读取 " + state.cart.items.length + " 条挂车文案。");
+      } catch (error) {
+        state.cart.items = [];
+        setStatus(els.cartStatus, "挂车发布读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        state.cart.loading = false;
+        renderCart();
+      }
     }
-    if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && next === "\n") i += 1;
+
+    async function loadLinks(forceRefresh) {
+      state.links.loading = true;
+      renderLinks();
+      setStatus(els.linkStatus, forceRefresh ? "正在刷新挂车链接..." : "正在读取挂车链接...", false, 0);
+
+      try {
+        state.links.items = parseLinkCsv(await fetchCsv(LINK_CSV_URL, forceRefresh));
+        setStatus(els.linkStatus, "已读取 " + state.links.items.length + " 个商品链接。");
+      } catch (error) {
+        state.links.items = [];
+        setStatus(els.linkStatus, "挂车链接读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        state.links.loading = false;
+        renderLinks();
+      }
+    }
+
+    async function fetchCsv(url, forceRefresh) {
+      const finalUrl = forceRefresh ? url + (url.includes("?") ? "&" : "?") + "t=" + Date.now() : url;
+      const response = await fetch(finalUrl, { cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.text();
+    }
+
+    function parseCaptionCsv(csvText, hasProductName) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["排序编号", "编号"]);
+      const productIndex = findHeader(headers, ["商品名称", "商品名"]);
+      const copyIndex = findHeader(headers, ["可复制文案"]);
+      const noteIndex = findHeader(headers, ["中文注释"]);
+      const languageIndex = findHeader(headers, ["语言"]);
+      if (copyIndex === -1 || noteIndex === -1) throw new Error("CSV 缺少必要字段");
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const copyText = cleanCell(row[copyIndex]);
+        if (isEmptyRow(row) || !copyText) return result;
+        result.push({
+          id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName: hasProductName && productIndex >= 0 ? cleanCell(row[productIndex]) : "",
+          copyText,
+          cnNote: cleanCell(row[noteIndex]),
+          language: languageIndex >= 0 ? cleanCell(row[languageIndex]) : ""
+        });
+        return result;
+      }, []);
+    }
+
+    function parseLinkCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell).toUpperCase());
+      const idIndex = headers.indexOf("编号");
+      const nameIndex = headers.indexOf("商品名");
+      const pidIndex = headers.indexOf("PID");
+      if (nameIndex === -1 || pidIndex === -1) throw new Error("CSV 缺少必要字段");
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const productName = cleanCell(row[nameIndex]);
+        const pid = cleanPid(row[pidIndex]);
+        if (isEmptyRow(row) || !productName || !pid) return result;
+        result.push({
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName,
+          pid,
+          url: PRODUCT_URL_PREFIX + pid
+        });
+        return result;
+      }, []);
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (char === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+
+        if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          rows.push(row);
+          row = [];
+          cell = "";
+          continue;
+        }
+
+        cell += char;
+      }
+
       row.push(cell);
       rows.push(row);
-      row = [];
-      cell = "";
-      continue;
+      return rows.filter((currentRow) => currentRow.some((cellValue) => cleanCell(cellValue) !== ""));
     }
-    cell += char;
-  }
 
-  row.push(cell);
-  rows.push(row);
-  return rows.filter((currentRow) => currentRow.some((cellValue) => cleanCell(cellValue) !== ""));
-}
+    function initCartProducts() {
+      const products = Array.from(new Set(state.cart.items.map((item) => item.productName).filter(Boolean)));
+      els.cartProductSelect.innerHTML = products.map((name) => {
+        return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>';
+      }).join("");
 
-function cleanCell(value) {
-  return String(value || "").trim();
-}
+      if (!products.includes(state.cart.currentProduct)) {
+        state.cart.currentProduct = products[0] || "";
+        save("cart_product", state.cart.currentProduct);
+      }
+      els.cartProductSelect.value = state.cart.currentProduct;
+    }
 
-function cleanPid(value) {
-  return cleanCell(value).replace(/\D/g, "");
-}
+    function renderDaily() {
+      const total = state.daily.items.length;
+      const item = state.daily.items[state.daily.index];
+      const visible = total ? state.daily.index + 1 : 0;
+      els.dailyTotal.textContent = total;
+      els.dailyCurrent.textContent = visible;
+      els.dailyProgress.textContent = visible + "/" + total;
+      els.dailyJumpInput.max = Math.max(total, 1);
 
-function isEmptyRow(row) {
-  return row.every((cell) => cleanCell(cell) === "");
-}
+      if (state.daily.loading) {
+        els.dailyCopyText.value = "正在读取表格数据...";
+        els.dailyCnNote.textContent = "正在读取表格数据...";
+        els.dailyMeta.textContent = "";
+      } else if (item) {
+        els.dailyCopyText.value = item.copyText;
+        els.dailyCnNote.textContent = item.cnNote || "无中文注释";
+        els.dailyMeta.innerHTML = [
+          "编号：" + escapeHtml(item.id),
+          "语言：" + escapeHtml(item.language || "-")
+        ].join("<br>");
+      } else {
+        els.dailyCopyText.value = "";
+        els.dailyCnNote.textContent = "没有可用文案。";
+        els.dailyMeta.textContent = "";
+      }
 
-function renderCaption(type) {
-  const module = captionModules[type];
-  const total = module.items.length;
-  const item = module.items[module.index];
-  const visibleIndex = total ? module.index + 1 : 0;
+      const disabled = state.daily.loading || total === 0;
+      els.dailyCopyBtn.disabled = disabled;
+      els.dailyPrevBtn.disabled = disabled || state.daily.index <= 0;
+      els.dailyResetBtn.disabled = disabled || state.daily.index === 0;
+      els.dailyJumpBtn.disabled = disabled;
+      els.dailyRefreshBtn.disabled = state.daily.loading;
+    }
 
-  module.els.total.textContent = String(total);
-  module.els.position.textContent = visibleIndex + " / " + total;
-  module.els.jumpInput.max = String(Math.max(total, 1));
+    function renderCart() {
+      const rows = getCurrentCartRows();
+      const total = rows.length;
+      const index = getCartIndex();
+      const item = rows[index];
+      const visible = total ? index + 1 : 0;
+      els.cartTotal.textContent = total;
+      els.cartCurrent.textContent = visible;
+      els.cartProgress.textContent = visible + "/" + total;
 
-  if (module.loading) {
-    module.els.preview.value = "正在读取表格数据...";
-    module.els.note.textContent = "正在读取表格数据...";
-    if (module.els.productName) module.els.productName.textContent = "正在读取表格数据...";
-  } else if (item) {
-    module.els.preview.value = item.copyText;
-    module.els.note.textContent = item.note || "无中文注释";
-    if (module.els.productName) module.els.productName.textContent = item.productName || "无商品名";
-  } else {
-    module.els.preview.value = "";
-    module.els.note.textContent = "没有可用文案。";
-    if (module.els.productName) module.els.productName.textContent = "没有可用商品。";
-  }
+      if (state.cart.loading) {
+        els.cartCopyText.value = "正在读取表格数据...";
+        els.cartCnNote.textContent = "正在读取表格数据...";
+        els.cartMeta.textContent = "";
+      } else if (item) {
+        els.cartCopyText.value = item.copyText;
+        els.cartCnNote.textContent = item.cnNote || "无中文注释";
+        els.cartMeta.innerHTML = [
+          "商品名称：" + escapeHtml(item.productName || "-"),
+          "编号：" + escapeHtml(item.id),
+          "语言：" + escapeHtml(item.language || "-")
+        ].join("<br>");
+      } else {
+        els.cartCopyText.value = "";
+        els.cartCnNote.textContent = state.cart.currentProduct ? "当前商品没有可用文案。" : "请先选择商品。";
+        els.cartMeta.textContent = "";
+      }
 
-  const disabled = module.loading || total === 0;
-  module.els.copyBtn.disabled = disabled;
-  module.els.prevBtn.disabled = disabled || module.index <= 0;
-  module.els.resetBtn.disabled = disabled || module.index === 0;
-  module.els.jumpBtn.disabled = disabled;
-  module.els.refreshBtn.disabled = module.loading;
-}
+      const disabled = state.cart.loading || total === 0;
+      els.cartCopyBtn.disabled = disabled;
+      els.cartPrevBtn.disabled = disabled || index <= 0;
+      els.cartResetBtn.disabled = disabled || index === 0;
+      els.cartRefreshBtn.disabled = state.cart.loading;
+    }
 
-function renderProducts() {
-  const keyword = els.productSearch.value.trim().toLowerCase();
-  const filtered = productItems.filter((item) => item.name.toLowerCase().includes(keyword));
-  els.productCount.textContent = String(productItems.length);
-  els.productRefreshBtn.disabled = isProductLoading;
+    function renderLinks() {
+      const keyword = normalizeText(els.linkSearchInput.value).toLowerCase();
+      const filtered = state.links.items.filter((item) => !keyword || item.productName.toLowerCase().includes(keyword));
+      els.linkTotal.textContent = state.links.items.length;
+      els.linkVisible.textContent = filtered.length;
+      els.linkRefreshBtn.disabled = state.links.loading;
 
-  if (isProductLoading) {
-    els.productList.innerHTML = '<div class="note">正在读取商品表格...</div>';
-    return;
-  }
-  if (!filtered.length) {
-    els.productList.innerHTML = '<div class="note">没有可用商品。</div>';
-    return;
-  }
+      if (state.links.loading) {
+        els.linkList.innerHTML = '<div class="empty">正在读取挂车链接...</div>';
+        return;
+      }
 
-  els.productList.innerHTML = filtered.map((item) => [
-    '<div class="productItem">',
-    '<span class="productNo">' + escapeHtml(item.id) + '</span>',
-    '<a class="productName" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.name) + '</a>',
-    '<button class="secondary copyLinkBtn" type="button" data-url="' + escapeHtml(item.url) + '">复制</button>',
-    '</div>'
-  ].join("")).join("");
-}
+      if (!filtered.length) {
+        els.linkList.innerHTML = '<div class="empty">没有找到匹配商品，请换个关键词搜索。</div>';
+        return;
+      }
 
-async function copyNextCaption(type) {
-  const module = captionModules[type];
-  const item = module.items[module.index];
-  if (!item) {
-    setStatus(module.els.status, "没有可复制的文案。", true);
-    return;
-  }
+      els.linkList.innerHTML = filtered.map((item) => {
+        return '<a class="productLink" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">' +
+          '<strong>' + escapeHtml(item.index) + '. ' + escapeHtml(item.productName) + '</strong>' +
+          '<span>' + escapeHtml(item.url) + '</span>' +
+          '</a>';
+      }).join("");
+    }
 
-  const copiedNumber = module.index + 1;
-  const ok = await copyText(item.copyText);
-  if (module.index < module.items.length - 1) {
-    module.index += 1;
-    saveCaptionIndex(type);
-  }
-  renderCaption(type);
-  setStatus(module.els.status, ok ? "已复制第 " + copiedNumber + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok, ok ? 1800 : 3500);
-}
+    async function copyDailyNext() {
+      const item = state.daily.items[state.daily.index];
+      if (!item) return;
+      const copiedIndex = state.daily.index + 1;
+      const ok = await copyText(item.copyText);
+      if (state.daily.index < state.daily.items.length - 1) {
+        state.daily.index += 1;
+        save("daily_index", state.daily.index);
+      }
+      renderDaily();
+      setStatus(els.dailyStatus, ok ? "已复制第 " + copiedIndex + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok);
+    }
 
-function prevCaption(type) {
-  const module = captionModules[type];
-  if (module.index > 0) {
-    module.index -= 1;
-    saveCaptionIndex(type);
-    renderCaption(type);
-    setStatus(module.els.status, "已回到第 " + (module.index + 1) + " 条。");
-  }
-}
+    async function copyCartNext() {
+      const rows = getCurrentCartRows();
+      const index = getCartIndex();
+      const item = rows[index];
+      if (!item) return;
+      const copiedIndex = index + 1;
+      const ok = await copyText(item.copyText);
+      if (index < rows.length - 1) {
+        setCartIndex(index + 1);
+      }
+      renderCart();
+      setStatus(els.cartStatus, ok ? "已复制第 " + copiedIndex + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok);
+    }
 
-function resetCaptionIndex(type) {
-  const module = captionModules[type];
-  module.index = 0;
-  saveCaptionIndex(type);
-  renderCaption(type);
-  setStatus(module.els.status, "已重置到第 1 条。");
-}
+    function moveDaily(delta) {
+      state.daily.index = clamp(state.daily.index + delta, 0, Math.max(state.daily.items.length - 1, 0));
+      save("daily_index", state.daily.index);
+      renderDaily();
+    }
 
-function jumpToCaption(type) {
-  const module = captionModules[type];
-  const target = cleanCell(module.els.jumpInput.value);
-  if (!target) {
-    setStatus(module.els.status, "请输入要跳转的编号。", true);
-    return;
-  }
+    function resetDaily() {
+      state.daily.index = 0;
+      save("daily_index", state.daily.index);
+      renderDaily();
+      setStatus(els.dailyStatus, "已重置到第 1 条。");
+    }
 
-  const foundIndex = module.items.findIndex((item) => item.id === target);
-  if (foundIndex === -1) {
-    setStatus(module.els.status, "没有找到编号 " + target + "。", true);
-    return;
-  }
+    function jumpDaily() {
+      const target = cleanCell(els.dailyJumpInput.value);
+      if (!target) {
+        setStatus(els.dailyStatus, "请输入要跳转的编号。", true);
+        return;
+      }
+      const foundIndex = state.daily.items.findIndex((item) => item.id === target);
+      if (foundIndex === -1) {
+        setStatus(els.dailyStatus, "没有找到编号 " + target + "。", true);
+        return;
+      }
+      state.daily.index = foundIndex;
+      save("daily_index", state.daily.index);
+      renderDaily();
+      setStatus(els.dailyStatus, "已跳转到编号 " + target + "。");
+    }
 
-  module.index = foundIndex;
-  saveCaptionIndex(type);
-  renderCaption(type);
-  setStatus(module.els.status, "已跳转到编号 " + target + "。");
-}
+    function moveCart(delta) {
+      setCartIndex(clamp(getCartIndex() + delta, 0, Math.max(getCurrentCartRows().length - 1, 0)));
+      renderCart();
+    }
 
-async function handleProductListClick(event) {
-  const button = event.target.closest("[data-url]");
-  if (!button) return;
-  const ok = await copyText(button.dataset.url);
-  setStatus(els.productStatus, ok ? "已复制商品链接。" : "自动复制失败，请长按链接手动复制。", !ok, ok ? 1800 : 3500);
-}
+    function resetCart() {
+      setCartIndex(0);
+      renderCart();
+      setStatus(els.cartStatus, "已重置到第 1 条。");
+    }
 
-async function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (error) {
+    function getCurrentCartRows() {
+      return state.cart.items.filter((item) => item.productName === state.cart.currentProduct);
+    }
+
+    function getCartIndex() {
+      const total = getCurrentCartRows().length;
+      const index = state.cart.indexByProduct[state.cart.currentProduct] || 0;
+      return clamp(index, 0, Math.max(total - 1, 0));
+    }
+
+    function setCartIndex(index) {
+      state.cart.indexByProduct[state.cart.currentProduct] = index;
+      save("cart_index_by_product", state.cart.indexByProduct);
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (error) {}
+      }
       return fallbackCopy(text);
     }
-  }
-  return fallbackCopy(text);
-}
 
-function fallbackCopy(text) {
-  try {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.top = "-1000px";
-    textarea.style.left = "-1000px";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
-    const ok = document.execCommand("copy");
-    document.body.removeChild(textarea);
-    return ok;
-  } catch (error) {
-    return false;
-  }
-}
+    function fallbackCopy(text) {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-1000px";
+        textarea.style.left = "-1000px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return ok;
+      } catch (error) {
+        return false;
+      }
+    }
 
-function setStatus(element, text, warning, duration) {
-  element.textContent = text || "";
-  element.className = warning ? "status warn" : "status";
-  clearTimeout(element.statusTimer);
-  if (text && duration !== 0) {
-    element.statusTimer = setTimeout(() => {
-      element.textContent = "";
-      element.className = "status";
-    }, duration || 1800);
-  }
-}
+    function setStatus(element, text, warning, duration) {
+      element.textContent = text || "";
+      element.className = warning ? "status warn" : "status";
+      clearTimeout(element.__timer);
+      if (text && duration !== 0) {
+        element.__timer = setTimeout(() => {
+          element.textContent = "";
+          element.className = "status";
+        }, duration || 1800);
+      }
+    }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-</script>
+    function findHeader(headers, names) {
+      return headers.findIndex((header) => names.includes(header));
+    }
+
+    function cleanCell(value) {
+      return String(value || "").trim();
+    }
+
+    function cleanPid(value) {
+      return cleanCell(value).replace(/\D/g, "");
+    }
+
+    function isEmptyRow(row) {
+      return row.every((cell) => cleanCell(cell) === "");
+    }
+
+    function normalizeText(value) {
+      return String(value || "").trim();
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function save(key, value) {
+      localStorage.setItem(STORAGE_PREFIX + key, typeof value === "string" ? value : JSON.stringify(value));
+    }
+
+    function readText(key, fallback) {
+      return localStorage.getItem(STORAGE_PREFIX + key) || fallback;
+    }
+
+    function readNumber(key, fallback) {
+      const value = parseInt(localStorage.getItem(STORAGE_PREFIX + key) || "", 10);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function readJson(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_PREFIX + key) || "") || fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function escapeHtml(value) {
+      return normalizeText(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
 </body>
 </html>
