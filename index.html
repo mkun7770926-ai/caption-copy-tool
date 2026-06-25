@@ -348,28 +348,62 @@
     }
 
     .productLink {
-      display: block;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
       padding: 15px;
       border-radius: 17px;
       border: 1px solid var(--line);
       background: #fff;
       color: var(--text);
-      text-decoration: none;
       box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
     }
 
-    .productLink strong {
+    .productNameLink {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .productNameLink strong {
       display: block;
       font-size: 16px;
       line-height: 1.35;
     }
 
-    .productLink span {
+    .productNameLink span {
       display: block;
       margin-top: 6px;
       color: var(--muted);
       font-size: 12px;
       overflow-wrap: anywhere;
+    }
+
+    .productLinkActions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .productLinkActions a,
+    .productLinkActions button {
+      min-height: 44px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .productLinkActions .copyPidBtn {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
     }
 
     .empty {
@@ -554,6 +588,11 @@
 
       els.linkRefreshBtn.addEventListener("click", () => loadLinks(true));
       els.linkSearchInput.addEventListener("input", renderLinks);
+      els.linkList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-copy-pid]");
+        if (!button) return;
+        copyLinkPid(button.dataset.copyPid, button.dataset.linkIndex);
+      });
     }
 
     function hydrateState() {
@@ -828,11 +867,23 @@
       }
 
       els.linkList.innerHTML = filtered.map((item) => {
-        return '<a class="productLink" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">' +
+        return '<div class="productLink">' +
+          '<a class="productNameLink" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">' +
           '<strong>' + escapeHtml(item.index) + '. ' + escapeHtml(item.productName) + '</strong>' +
-          '<span>' + escapeHtml(item.url) + '</span>' +
-          '</a>';
+          '<span>PID: ' + escapeHtml(item.pid) + '</span>' +
+          '</a>' +
+          '<div class="productLinkActions">' +
+          '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener">打开网页</a>' +
+          '<button class="copyPidBtn" type="button" data-copy-pid="' + escapeHtml(item.pid) + '" data-link-index="' + escapeHtml(item.index) + '">复制 PID</button>' +
+          '</div>' +
+          '</div>';
       }).join("");
+    }
+
+    async function copyLinkPid(pid, index) {
+      if (!pid) return;
+      const ok = await copyText(pid);
+      setStatus(els.linkStatus, ok ? "已复制第 " + index + " 个商品 PID。" : "自动复制失败，请手动复制 PID：" + pid, !ok);
     }
 
     async function copyDailyNext() {
