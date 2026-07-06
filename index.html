@@ -284,6 +284,99 @@
       user-select: text;
     }
 
+    .actionGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .copyTitleBtn {
+      background: linear-gradient(135deg, #101828, #1647a8);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(16, 43, 92, .22);
+    }
+
+    .copyTextBtn {
+      background: linear-gradient(135deg, #0f766e, #1268ff);
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(15, 118, 110, .18);
+    }
+
+    .copyPidBtn {
+      background: #111827;
+      color: #fff;
+    }
+
+    .openBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 54px;
+      border-radius: 15px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 900;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .openBtn.is-disabled {
+      opacity: .48;
+      pointer-events: none;
+    }
+
+    .resetWide {
+      margin-top: 10px;
+    }
+
+    .copyBlock {
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(16, 43, 92, .07);
+    }
+
+    .copyBlock strong {
+      display: block;
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .copyBlock .copyText {
+      min-height: 24px;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    .copyBlock .titleText {
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .translation {
+      margin-top: 7px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: rgba(18, 104, 255, .06);
+      color: #718096;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
     .note {
       margin-top: 10px;
       padding: 13px;
@@ -392,7 +485,7 @@
       background: var(--soft);
       color: var(--text);
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 900;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -422,7 +515,7 @@
     @media (max-width: 380px) {
       .page { padding-left: 10px; padding-right: 10px; }
       .hero, .panel { border-radius: 17px; padding: 15px; }
-      .stats, .row, .jumpRow { grid-template-columns: 1fr; }
+      .stats, .row, .jumpRow, .actionGrid, .productLinkActions { grid-template-columns: 1fr; }
       h1 { font-size: 22px; }
       h2 { font-size: 23px; }
     }
@@ -440,7 +533,7 @@
         </div>
         <div class="modeGrid">
           <button class="modeBtn" type="button" data-view="dailyView">日常发布<span>复制日常文案</span></button>
-          <button class="modeBtn" type="button" data-view="cartView">挂车发布<span>按商品选择文案并复制</span></button>
+          <button class="modeBtn" type="button" data-view="cartView">挂车发布<span>复制标题、文案和 PID</span></button>
           <button class="modeBtn" type="button" data-view="linkView">挂车链接<span>搜索并打开商品页面</span></button>
         </div>
       </section>
@@ -491,16 +584,28 @@
           <div class="stat"><span>当前</span><strong id="cartCurrent">0</strong></div>
           <div class="stat"><span>进度</span><strong id="cartProgress">0/0</strong></div>
         </div>
-        <button id="cartCopyBtn" class="primary" type="button">复制下一条</button>
+        <div class="actionGrid">
+          <button id="cartCopyTitleBtn" class="copyTitleBtn" type="button">复制标题</button>
+          <button id="cartCopyTextBtn" class="copyTextBtn" type="button">复制文案</button>
+          <button id="cartCopyPidBtn" class="copyPidBtn" type="button">复制 PID</button>
+          <a id="cartOpenLink" class="openBtn" href="#" target="_blank" rel="noopener">打开网页</a>
+        </div>
         <div class="row">
           <button id="cartPrevBtn" class="secondary" type="button">上一条</button>
-          <button id="cartResetBtn" class="secondary" type="button">重置</button>
+          <button id="cartNextBtn" class="secondary" type="button">下一条</button>
         </div>
+        <button id="cartResetBtn" class="secondary resetWide" type="button">重置</button>
         <div id="cartResult" class="result">
-          <span class="fieldLabel">当前文案</span>
-          <textarea id="cartCopyText" readonly></textarea>
-          <span class="fieldLabel">中文注释</span>
-          <div id="cartCnNote" class="note"></div>
+          <div class="copyBlock">
+            <strong>当前标题</strong>
+            <div id="cartTitleText" class="copyText titleText"></div>
+            <div id="cartTitleCn" class="translation"></div>
+          </div>
+          <div class="copyBlock">
+            <strong>当前文案</strong>
+            <div id="cartCopyText" class="copyText"></div>
+            <div id="cartCopyCn" class="translation"></div>
+          </div>
           <div id="cartMeta" class="meta"></div>
         </div>
         <div id="cartStatus" class="status" role="status" aria-live="polite"></div>
@@ -528,7 +633,7 @@
 
   <script>
     const DAILY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
-    const CART_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=512170271&single=true&output=csv";
+    const CART_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=595518262&single=true&output=csv";
     const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
     const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
     const STORAGE_PREFIX = "mark_tools_google_sheet_v1_";
@@ -556,8 +661,9 @@
         "homeView", "dailyView", "cartView", "linkView",
         "dailyRefreshBtn", "dailyCopyBtn", "dailyPrevBtn", "dailyResetBtn", "dailyJumpInput", "dailyJumpBtn",
         "dailyTotal", "dailyCurrent", "dailyProgress", "dailyCopyText", "dailyCnNote", "dailyMeta", "dailyStatus",
-        "cartRefreshBtn", "cartProductSelect", "cartCopyBtn", "cartPrevBtn", "cartResetBtn",
-        "cartTotal", "cartCurrent", "cartProgress", "cartCopyText", "cartCnNote", "cartMeta", "cartStatus",
+        "cartRefreshBtn", "cartProductSelect", "cartCopyTitleBtn", "cartCopyTextBtn", "cartCopyPidBtn", "cartOpenLink",
+        "cartPrevBtn", "cartNextBtn", "cartResetBtn", "cartTotal", "cartCurrent", "cartProgress",
+        "cartTitleText", "cartTitleCn", "cartCopyText", "cartCopyCn", "cartMeta", "cartStatus",
         "linkRefreshBtn", "linkSearchInput", "linkTotal", "linkVisible", "linkList", "linkStatus"
       ].forEach((id) => { els[id] = document.getElementById(id); });
     }
@@ -582,8 +688,11 @@
         save("cart_product", state.cart.currentProduct);
         renderCart();
       });
-      els.cartCopyBtn.addEventListener("click", copyCartNext);
+      els.cartCopyTitleBtn.addEventListener("click", () => copyCurrentCartField("title", "标题"));
+      els.cartCopyTextBtn.addEventListener("click", () => copyCurrentCartField("copyText", "文案"));
+      els.cartCopyPidBtn.addEventListener("click", () => copyCurrentCartField("pid", "PID"));
       els.cartPrevBtn.addEventListener("click", () => moveCart(-1));
+      els.cartNextBtn.addEventListener("click", () => moveCart(1));
       els.cartResetBtn.addEventListener("click", resetCart);
 
       els.linkRefreshBtn.addEventListener("click", () => loadLinks(true));
@@ -613,6 +722,14 @@
     }
 
     async function loadDaily(forceRefresh) {
+      if (!isConfiguredCsv(DAILY_CSV_URL)) {
+        state.daily.items = [];
+        state.daily.index = 0;
+        renderDaily();
+        setStatus(els.dailyStatus, "请先在 index.html 填写日常发布 CSV 链接。", true, 0);
+        return;
+      }
+
       state.daily.loading = true;
       renderDaily();
       setStatus(els.dailyStatus, forceRefresh ? "正在刷新日常发布..." : "正在读取日常发布...", false, 0);
@@ -633,12 +750,19 @@
     }
 
     async function loadCart(forceRefresh) {
+      if (!isConfiguredCsv(CART_CSV_URL)) {
+        state.cart.items = [];
+        renderCart();
+        setStatus(els.cartStatus, "请先在 index.html 填写挂车发布 CSV 链接。", true, 0);
+        return;
+      }
+
       state.cart.loading = true;
       renderCart();
       setStatus(els.cartStatus, forceRefresh ? "正在刷新挂车发布..." : "正在读取挂车发布...", false, 0);
 
       try {
-        state.cart.items = parseCaptionCsv(await fetchCsv(CART_CSV_URL, forceRefresh), true);
+        state.cart.items = parseCartTitleCsv(await fetchCsv(CART_CSV_URL, forceRefresh));
         initCartProducts();
         setStatus(els.cartStatus, "已读取 " + state.cart.items.length + " 条挂车文案。");
       } catch (error) {
@@ -651,6 +775,13 @@
     }
 
     async function loadLinks(forceRefresh) {
+      if (!isConfiguredCsv(LINK_CSV_URL)) {
+        state.links.items = [];
+        renderLinks();
+        setStatus(els.linkStatus, "请先在 index.html 填写挂车链接 CSV 链接。", true, 0);
+        return;
+      }
+
       state.links.loading = true;
       renderLinks();
       setStatus(els.linkStatus, forceRefresh ? "正在刷新挂车链接..." : "正在读取挂车链接...", false, 0);
@@ -672,6 +803,10 @@
       const response = await fetch(finalUrl, { cache: "no-store" });
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.text();
+    }
+
+    function isConfiguredCsv(url) {
+      return url && !url.includes("这里填写");
     }
 
     function parseCaptionCsv(csvText, hasProductName) {
@@ -698,6 +833,40 @@
         });
         return result;
       }, []);
+    }
+
+    function parseCartTitleCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "排序编号", "编号"]);
+      const productIndex = findHeader(headers, ["商品名称", "商品名"]);
+      const pidIndex = findHeader(headers, ["PID"]);
+      const titleIndex = findHeader(headers, ["标题"]);
+      const titleCnIndex = findHeader(headers, ["标题中文翻译"]);
+      const copyIndex = findHeader(headers, ["文案", "可复制文案"]);
+      const copyCnIndex = findHeader(headers, ["文案中文翻译"]);
+      if (productIndex === -1 || pidIndex === -1 || titleIndex === -1 || copyIndex === -1) throw new Error("CSV 缺少必要字段");
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const productName = cleanCell(row[productIndex]);
+        const pid = cleanPid(row[pidIndex]);
+        const title = cleanCell(row[titleIndex]);
+        const copyText = cleanCell(row[copyIndex]);
+        if (isEmptyRow(row) || !productName || !pid || !title || !copyText) return result;
+        result.push({
+          id: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName,
+          pid,
+          url: PRODUCT_URL_PREFIX + pid,
+          title,
+          titleCn: titleCnIndex >= 0 ? cleanCell(row[titleCnIndex]) : "",
+          copyText,
+          copyCn: copyCnIndex >= 0 ? cleanCell(row[copyCnIndex]) : ""
+        });
+        return result;
+      }, []).sort((a, b) => Number(a.id) - Number(b.id));
     }
 
     function parseLinkCsv(csvText) {
@@ -825,28 +994,42 @@
       els.cartProgress.textContent = visible + "/" + total;
 
       if (state.cart.loading) {
-        els.cartCopyText.value = "正在读取表格数据...";
-        els.cartCnNote.textContent = "正在读取表格数据...";
+        els.cartTitleText.textContent = "正在读取表格数据...";
+        els.cartTitleCn.textContent = "";
+        els.cartCopyText.textContent = "正在读取表格数据...";
+        els.cartCopyCn.textContent = "";
         els.cartMeta.textContent = "";
       } else if (item) {
-        els.cartCopyText.value = item.copyText;
-        els.cartCnNote.textContent = item.cnNote || "无中文注释";
+        els.cartTitleText.textContent = item.title;
+        els.cartTitleCn.textContent = item.titleCn || "暂无标题中文翻译";
+        els.cartCopyText.textContent = item.copyText;
+        els.cartCopyCn.textContent = item.copyCn || "暂无文案中文翻译";
         els.cartMeta.innerHTML = [
           "商品名称：" + escapeHtml(item.productName || "-"),
           "编号：" + escapeHtml(item.id),
-          "语言：" + escapeHtml(item.language || "-")
+          "PID：" + escapeHtml(item.pid)
         ].join("<br>");
+        els.cartOpenLink.href = item.url;
+        els.cartOpenLink.classList.remove("is-disabled");
       } else {
-        els.cartCopyText.value = "";
-        els.cartCnNote.textContent = state.cart.currentProduct ? "当前商品没有可用文案。" : "请先选择商品。";
+        els.cartTitleText.textContent = "";
+        els.cartTitleCn.textContent = "";
+        els.cartCopyText.textContent = "";
+        els.cartCopyCn.textContent = state.cart.currentProduct ? "当前商品没有可用文案。" : "请先选择商品。";
         els.cartMeta.textContent = "";
+        els.cartOpenLink.href = "#";
+        els.cartOpenLink.classList.add("is-disabled");
       }
 
       const disabled = state.cart.loading || total === 0;
-      els.cartCopyBtn.disabled = disabled;
+      els.cartCopyTitleBtn.disabled = disabled;
+      els.cartCopyTextBtn.disabled = disabled;
+      els.cartCopyPidBtn.disabled = disabled;
       els.cartPrevBtn.disabled = disabled || index <= 0;
+      els.cartNextBtn.disabled = disabled || index >= total - 1;
       els.cartResetBtn.disabled = disabled || index === 0;
       els.cartRefreshBtn.disabled = state.cart.loading;
+      els.cartOpenLink.classList.toggle("is-disabled", disabled);
     }
 
     function renderLinks() {
@@ -899,18 +1082,13 @@
       setStatus(els.dailyStatus, ok ? "已复制第 " + copiedIndex + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok);
     }
 
-    async function copyCartNext() {
+    async function copyCurrentCartField(field, label) {
       const rows = getCurrentCartRows();
       const index = getCartIndex();
       const item = rows[index];
       if (!item) return;
-      const copiedIndex = index + 1;
-      const ok = await copyText(item.copyText);
-      if (index < rows.length - 1) {
-        setCartIndex(index + 1);
-      }
-      renderCart();
-      setStatus(els.cartStatus, ok ? "已复制第 " + copiedIndex + " 条。" : "自动复制失败，请长按文案框手动复制。", !ok);
+      const ok = await copyText(item[field]);
+      setStatus(els.cartStatus, ok ? "已复制第 " + (index + 1) + " 条" + label + "。" : "自动复制失败，请手动复制" + label + "。", !ok);
     }
 
     function moveDaily(delta) {
