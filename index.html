@@ -246,20 +246,6 @@
       line-height: 1.25;
     }
 
-    .productIndex {
-      flex: 0 0 auto;
-      min-width: 36px;
-      height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      background: rgba(18, 104, 255, .09);
-      color: var(--blue);
-      font-size: 13px;
-      font-weight: 900;
-    }
-
     .productMeta {
       display: grid;
       gap: 3px;
@@ -573,8 +559,7 @@
         const hasLink = Boolean(item.link);
         return '<div class="productCard">' +
           '<div class="productHead">' +
-          '<div class="productName">' + escapeHtml(item.productName) + '</div>' +
-          '<div class="productIndex">' + escapeHtml(item.index) + '</div>' +
+          '<div class="productName">' + escapeHtml(item.index) + '. ' + escapeHtml(item.productName) + '</div>' +
           '</div>' +
           '<div class="productMeta">' +
           '<div><strong>PID：</strong>' + escapeHtml(item.pid) + '</div>' +
