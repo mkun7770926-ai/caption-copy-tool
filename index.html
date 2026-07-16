@@ -569,12 +569,12 @@
         return;
       }
 
-      els.linkList.innerHTML = filtered.map((item, displayIndex) => {
+      els.linkList.innerHTML = filtered.map((item) => {
         const hasLink = Boolean(item.link);
         return '<div class="productCard">' +
           '<div class="productHead">' +
           '<div class="productName">' + escapeHtml(item.productName) + '</div>' +
-          '<div class="productIndex">' + escapeHtml(displayIndex + 1) + '</div>' +
+          '<div class="productIndex">' + escapeHtml(item.index) + '</div>' +
           '</div>' +
           '<div class="productMeta">' +
           '<div><strong>PID：</strong>' + escapeHtml(item.pid) + '</div>' +
