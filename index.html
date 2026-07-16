@@ -218,14 +218,14 @@
 
     .linkList {
       display: grid;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .productCard {
       display: grid;
-      gap: 12px;
-      padding: 15px;
+      gap: 9px;
+      padding: 12px 14px;
       border-radius: 17px;
       border: 1px solid var(--line);
       background: #fff;
@@ -241,9 +241,9 @@
     }
 
     .productName {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 900;
-      line-height: 1.35;
+      line-height: 1.25;
     }
 
     .productIndex {
@@ -262,10 +262,10 @@
 
     .productMeta {
       display: grid;
-      gap: 5px;
+      gap: 3px;
       color: var(--muted);
       font-size: 12px;
-      line-height: 1.45;
+      line-height: 1.35;
       overflow-wrap: anywhere;
     }
 
@@ -281,12 +281,13 @@
     }
 
     .copyPidBtn {
+      min-height: 48px;
       background: #111827;
       color: #fff;
     }
 
     .openLinkBtn {
-      min-height: 54px;
+      min-height: 48px;
       border-radius: 15px;
       background: var(--soft);
       border: 1px solid var(--line);
@@ -568,15 +569,14 @@
         return;
       }
 
-      els.linkList.innerHTML = filtered.map((item) => {
+      els.linkList.innerHTML = filtered.map((item, displayIndex) => {
         const hasLink = Boolean(item.link);
         return '<div class="productCard">' +
           '<div class="productHead">' +
           '<div class="productName">' + escapeHtml(item.productName) + '</div>' +
-          '<div class="productIndex">' + escapeHtml(item.index) + '</div>' +
+          '<div class="productIndex">' + escapeHtml(displayIndex + 1) + '</div>' +
           '</div>' +
           '<div class="productMeta">' +
-          '<div><strong>手机号：</strong>' + escapeHtml(item.phone) + '</div>' +
           '<div><strong>PID：</strong>' + escapeHtml(item.pid) + '</div>' +
           '<div><strong>链接：</strong>' + escapeHtml(item.link || "未填写") + '</div>' +
           '</div>' +
