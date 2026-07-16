@@ -235,15 +235,30 @@
 
     .productHead {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 9px;
     }
 
     .productName {
       font-size: 17px;
       font-weight: 900;
       line-height: 1.25;
+    }
+
+    .productIndex {
+      flex: 0 0 auto;
+      min-width: 30px;
+      height: 26px;
+      padding: 0 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(18, 104, 255, .10);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
     }
 
     .productMeta {
@@ -262,14 +277,19 @@
 
     .productActions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
     }
 
-    .copyPidBtn {
+    .copyPidBtn,
+    .copyCaptionBtn {
       min-height: 48px;
       background: #111827;
       color: #fff;
+    }
+
+    .copyCaptionBtn {
+      background: var(--blue);
     }
 
     .openLinkBtn {
@@ -325,8 +345,7 @@
         padding: 15px;
       }
 
-      .stats,
-      .productActions {
+      .stats {
         grid-template-columns: 1fr;
       }
 
@@ -410,9 +429,16 @@
         renderLinks();
       });
       els.linkList.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-copy-pid]");
-        if (!button) return;
-        copyPid(button.dataset.copyPid);
+        const pidButton = event.target.closest("[data-copy-pid]");
+        if (pidButton) {
+          copyPid(pidButton.dataset.copyPid);
+          return;
+        }
+
+        const captionButton = event.target.closest("[data-copy-caption-key]");
+        if (!captionButton) return;
+        const item = state.items.find((currentItem) => currentItem.rowKey === captionButton.dataset.copyCaptionKey);
+        if (item) copyCaption(item.caption);
       });
     }
 
@@ -456,6 +482,7 @@
       const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
       const pidIndex = findHeader(headers, ["PID"]);
       const linkIndex = findHeader(headers, ["挂车链接", "链接"]);
+      const captionIndex = findHeader(headers, ["文案", "可复制文案"]);
       if (phoneIndex === -1 || nameIndex === -1 || pidIndex === -1 || linkIndex === -1) {
         throw new Error("CSV 缺少必要字段");
       }
@@ -465,13 +492,16 @@
         const productName = cleanCell(row[nameIndex]);
         const pid = cleanPid(row[pidIndex]);
         const link = cleanCell(row[linkIndex]);
+        const caption = captionIndex >= 0 ? cleanCell(row[captionIndex]) : "";
         if (isEmptyRow(row) || !phone || !productName || !pid) return result;
         result.push({
+          rowKey: String(rowIndex),
           index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
           phone,
           productName,
           pid,
-          link
+          link,
+          caption
         });
         return result;
       }, []);
@@ -557,9 +587,11 @@
 
       els.linkList.innerHTML = filtered.map((item) => {
         const hasLink = Boolean(item.link);
+        const hasCaption = Boolean(item.caption);
         return '<div class="productCard">' +
           '<div class="productHead">' +
-          '<div class="productName">' + escapeHtml(item.index) + '. ' + escapeHtml(item.productName) + '</div>' +
+          '<span class="productIndex">' + escapeHtml(item.index) + '</span>' +
+          '<div class="productName">' + escapeHtml(item.productName) + '</div>' +
           '</div>' +
           '<div class="productMeta">' +
           '<div><strong>PID：</strong>' + escapeHtml(item.pid) + '</div>' +
@@ -567,6 +599,7 @@
           '</div>' +
           '<div class="productActions">' +
           '<button class="copyPidBtn" type="button" data-copy-pid="' + escapeHtml(item.pid) + '">复制 PID</button>' +
+          '<button class="copyCaptionBtn" type="button" data-copy-caption-key="' + escapeHtml(item.rowKey) + '"' + (hasCaption ? "" : " disabled") + '>复制文案</button>' +
           '<a class="openLinkBtn' + (hasLink ? "" : " is-disabled") + '" href="' + escapeHtml(hasLink ? item.link : "#") + '" target="_blank" rel="noopener">打开链接</a>' +
           '</div>' +
           '</div>';
@@ -578,6 +611,13 @@
       const ok = await copyText(pid);
       if (ok) showToast("PID 已复制");
       setStatus(ok ? "PID 已复制。" : "自动复制失败，请手动复制 PID：" + pid, !ok);
+    }
+
+    async function copyCaption(caption) {
+      if (!caption) return;
+      const ok = await copyText(caption);
+      if (ok) showToast("文案已复制");
+      setStatus(ok ? "文案已复制。" : "自动复制失败，请长按后手动复制文案。", !ok);
     }
 
     async function copyText(text) {
