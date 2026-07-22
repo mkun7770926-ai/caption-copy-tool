@@ -73,6 +73,10 @@
       align-items: center;
     }
 
+    .page.module-open {
+      align-items: flex-start;
+    }
+
     .shell {
       width: 100%;
     }
@@ -159,6 +163,43 @@
       line-height: 1.5;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    .moduleGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .moduleEntry {
+      min-height: 118px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      text-align: left;
+      box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
+    }
+
+    .moduleEntry strong,
+    .moduleEntry span {
+      display: block;
+    }
+
+    .moduleEntry strong {
+      font-size: 20px;
+    }
+
+    .moduleEntry span {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
     .topbar {
       display: flex;
       align-items: flex-end;
@@ -167,7 +208,14 @@
       margin-bottom: 14px;
     }
 
-    .refreshBtn {
+    .topbarActions {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .refreshBtn,
+    .backBtn {
       width: auto;
       min-width: 106px;
       min-height: 46px;
@@ -176,6 +224,11 @@
       color: var(--text);
       border: 1px solid var(--line);
       font-size: 14px;
+    }
+
+    .backBtn {
+      min-width: 82px;
+      background: #fff;
     }
 
     .fieldLabel {
@@ -220,6 +273,49 @@
       display: grid;
       gap: 8px;
       margin-top: 10px;
+    }
+
+    .quickList {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quickMeta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .quickMeta div {
+      min-width: 0;
+      padding: 9px 10px;
+      border-radius: 11px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .quickMeta strong {
+      color: #344054;
+    }
+
+    .quickActions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .quickCopyBtn {
+      min-height: 48px;
+      background: #111827;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .quickCopyBtn:nth-child(even) {
+      background: var(--blue);
     }
 
     .productCard {
@@ -349,6 +445,23 @@
         grid-template-columns: 1fr;
       }
 
+      .moduleGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .topbarActions {
+        flex-direction: column;
+      }
+
+      .refreshBtn,
+      .backBtn {
+        min-width: 88px;
+      }
+
       h1 {
         font-size: 22px;
       }
@@ -361,35 +474,66 @@
 </head>
 <body>
   <div id="copyToast" class="toast" role="status" aria-live="polite"></div>
-  <main class="page">
+  <main id="page" class="page">
     <section class="panel">
       <div class="brand">
         <div class="logo">M</div>
         <div>
           <h1>Mark的小工具</h1>
-          <p class="sub">按手机号筛选挂车商品，复制 PID 或打开挂车链接。</p>
+          <p class="sub">选择需要使用的工具。</p>
         </div>
       </div>
 
-      <div class="topbar">
-        <h2>挂车链接</h2>
-        <button id="refreshBtn" class="refreshBtn" type="button">刷新数据</button>
+      <div id="homeView">
+        <div class="moduleGrid">
+          <button class="moduleEntry" type="button" data-open-view="quick">
+            <strong>一键复制</strong>
+            <span>查看手机和账号，复制对应字段内容</span>
+          </button>
+          <button class="moduleEntry" type="button" data-open-view="links">
+            <strong>挂车链接</strong>
+            <span>按手机号筛选商品，复制 PID、文案或打开链接</span>
+          </button>
+        </div>
       </div>
 
-      <label class="fieldLabel" for="phoneSelect">选择手机号</label>
-      <select id="phoneSelect"></select>
-
-      <div class="stats">
-        <div class="stat"><span>全部商品</span><strong id="totalCount">0</strong></div>
-        <div class="stat"><span>当前手机号</span><strong id="visibleCount">0</strong></div>
+      <div id="quickView" hidden>
+        <div class="topbar">
+          <h2>一键复制</h2>
+          <div class="topbarActions">
+            <button class="backBtn" type="button" data-open-view="home">返回首页</button>
+            <button id="quickRefreshBtn" class="refreshBtn" type="button">刷新数据</button>
+          </div>
+        </div>
+        <div id="quickList" class="quickList"></div>
+        <div id="quickStatus" class="status" role="status" aria-live="polite"></div>
       </div>
 
-      <div id="linkList" class="linkList"></div>
-      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="linkView" hidden>
+        <div class="topbar">
+          <h2>挂车链接</h2>
+          <div class="topbarActions">
+            <button class="backBtn" type="button" data-open-view="home">返回首页</button>
+            <button id="refreshBtn" class="refreshBtn" type="button">刷新数据</button>
+          </div>
+        </div>
+
+        <label class="fieldLabel" for="phoneSelect">选择手机号</label>
+        <select id="phoneSelect"></select>
+
+        <div class="stats">
+          <div class="stat"><span>全部商品</span><strong id="totalCount">0</strong></div>
+          <div class="stat"><span>当前手机号</span><strong id="visibleCount">0</strong></div>
+        </div>
+
+        <div id="linkList" class="linkList"></div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </div>
     </section>
   </main>
 
   <script>
+    const QUICK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
     const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
     const STORAGE_PREFIX = "mark_tools_link_only_v1_";
 
@@ -397,7 +541,14 @@
       items: [],
       phones: [],
       currentPhone: "",
-      loading: false
+      loading: false,
+      loaded: false
+    };
+
+    const quickState = {
+      items: [],
+      loading: false,
+      loaded: false
     };
 
     const els = {};
@@ -406,12 +557,19 @@
       cacheElements();
       bindEvents();
       hydrateState();
-      loadLinks(false);
+      openView("home");
     });
 
     function cacheElements() {
       [
         "copyToast",
+        "page",
+        "homeView",
+        "quickView",
+        "linkView",
+        "quickRefreshBtn",
+        "quickList",
+        "quickStatus",
         "refreshBtn",
         "phoneSelect",
         "totalCount",
@@ -422,6 +580,11 @@
     }
 
     function bindEvents() {
+      document.addEventListener("click", (event) => {
+        const viewButton = event.target.closest("[data-open-view]");
+        if (viewButton) openView(viewButton.dataset.openView);
+      });
+      els.quickRefreshBtn.addEventListener("click", () => loadQuick(true));
       els.refreshBtn.addEventListener("click", () => loadLinks(true));
       els.phoneSelect.addEventListener("change", () => {
         state.currentPhone = els.phoneSelect.value;
@@ -440,10 +603,50 @@
         const item = state.items.find((currentItem) => currentItem.rowKey === captionButton.dataset.copyCaptionKey);
         if (item) copyCaption(item.caption);
       });
+      els.quickList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-quick-row][data-quick-field]");
+        if (!button) return;
+        const item = quickState.items.find((currentItem) => currentItem.rowKey === button.dataset.quickRow);
+        const fieldNumber = Number(button.dataset.quickField);
+        if (item && fieldNumber >= 1 && fieldNumber <= 4) {
+          copyQuickField(item.fields[fieldNumber - 1], fieldNumber);
+        }
+      });
+    }
+
+    function openView(viewName) {
+      const isQuick = viewName === "quick";
+      const isLinks = viewName === "links";
+      els.homeView.hidden = isQuick || isLinks;
+      els.quickView.hidden = !isQuick;
+      els.linkView.hidden = !isLinks;
+      els.page.classList.toggle("module-open", isQuick || isLinks);
+      window.scrollTo(0, 0);
+
+      if (isQuick && !quickState.loaded && !quickState.loading) loadQuick(false);
+      if (isLinks && !state.loaded && !state.loading) loadLinks(false);
     }
 
     function hydrateState() {
       state.currentPhone = readText("phone", "");
+    }
+
+    async function loadQuick(forceRefresh) {
+      quickState.loading = true;
+      renderQuick();
+      setQuickStatus(forceRefresh ? "正在刷新一键复制数据..." : "正在读取一键复制数据...", false, 0);
+
+      try {
+        quickState.items = parseQuickCsv(await fetchCsv(QUICK_CSV_URL, forceRefresh));
+        setQuickStatus("已读取 " + quickState.items.length + " 条记录。");
+      } catch (error) {
+        quickState.items = [];
+        setQuickStatus("一键复制数据读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        quickState.loading = false;
+        quickState.loaded = true;
+        renderQuick();
+      }
     }
 
     async function loadLinks(forceRefresh) {
@@ -461,6 +664,7 @@
         setStatus("挂车链接读取失败，请检查 Google 表格发布链接。", true, 0);
       } finally {
         state.loading = false;
+        state.loaded = true;
         renderLinks();
       }
     }
@@ -502,6 +706,33 @@
           pid,
           link,
           caption
+        });
+        return result;
+      }, []);
+    }
+
+    function parseQuickCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
+      const phoneIndex = findHeader(headers, ["手机", "手机号"]);
+      const accountIndex = findHeader(headers, ["账号", "账户"]);
+      const fieldIndexes = [1, 2, 3, 4].map((number) => findHeader(headers, ["复制字段" + number, "字段" + number]));
+      if (fieldIndexes.every((index) => index === -1)) {
+        throw new Error("CSV 缺少复制字段");
+      }
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const fields = fieldIndexes.map((index) => index >= 0 ? cleanCell(row[index]) : "");
+        if (!fields.some(Boolean)) return result;
+        result.push({
+          rowKey: String(rowIndex),
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          phone: phoneIndex >= 0 ? cleanCell(row[phoneIndex]) : "",
+          account: accountIndex >= 0 ? cleanCell(row[accountIndex]) : "",
+          fields
         });
         return result;
       }, []);
@@ -563,6 +794,36 @@
       els.phoneSelect.value = state.currentPhone;
     }
 
+    function renderQuick() {
+      els.quickRefreshBtn.disabled = quickState.loading;
+
+      if (quickState.loading) {
+        els.quickList.innerHTML = '<div class="empty">正在读取一键复制数据...</div>';
+        return;
+      }
+
+      if (!quickState.items.length) {
+        els.quickList.innerHTML = '<div class="empty">没有读取到可复制内容，请检查 Google 表格。</div>';
+        return;
+      }
+
+      els.quickList.innerHTML = quickState.items.map((item) => {
+        const buttons = item.fields.map((value, fieldIndex) => {
+          const fieldNumber = fieldIndex + 1;
+          return '<button class="quickCopyBtn" type="button" data-quick-row="' + escapeHtml(item.rowKey) + '" data-quick-field="' + fieldNumber + '"' + (value ? "" : " disabled") + '>复制字段' + fieldNumber + '</button>';
+        }).join("");
+
+        return '<div class="productCard">' +
+          '<div class="productHead"><span class="productIndex">' + escapeHtml(item.index) + '</span></div>' +
+          '<div class="quickMeta">' +
+          '<div><strong>手机：</strong>' + escapeHtml(item.phone || "无") + '</div>' +
+          '<div><strong>账号：</strong>' + escapeHtml(item.account || "无") + '</div>' +
+          '</div>' +
+          '<div class="quickActions">' + buttons + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
     function renderLinks() {
       const filtered = state.items.filter((item) => item.phone === state.currentPhone);
       els.totalCount.textContent = state.items.length;
@@ -620,6 +881,13 @@
       setStatus(ok ? "文案已复制。" : "自动复制失败，请长按后手动复制文案。", !ok);
     }
 
+    async function copyQuickField(value, fieldNumber) {
+      if (!value) return;
+      const ok = await copyText(value);
+      if (ok) showToast("已复制字段" + fieldNumber);
+      setQuickStatus(ok ? "已复制字段" + fieldNumber + "。" : "自动复制失败，请长按后手动复制。", !ok);
+    }
+
     async function copyText(text) {
       if (navigator.clipboard && window.isSecureContext) {
         try {
@@ -658,6 +926,18 @@
         els.status.__timer = setTimeout(() => {
           els.status.textContent = "";
           els.status.className = "status";
+        }, duration || 1800);
+      }
+    }
+
+    function setQuickStatus(text, warning, duration) {
+      els.quickStatus.textContent = text || "";
+      els.quickStatus.className = warning ? "status warn" : "status";
+      clearTimeout(els.quickStatus.__timer);
+      if (text && duration !== 0) {
+        els.quickStatus.__timer = setTimeout(() => {
+          els.quickStatus.textContent = "";
+          els.quickStatus.className = "status";
         }, duration || 1800);
       }
     }
