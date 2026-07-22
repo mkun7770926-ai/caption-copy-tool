@@ -283,7 +283,7 @@
 
     .quickMeta {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 8px;
     }
 
@@ -309,13 +309,30 @@
 
     .quickCopyBtn {
       min-height: 48px;
-      background: #111827;
       color: #fff;
       font-size: 15px;
     }
 
-    .quickCopyBtn:nth-child(even) {
-      background: var(--blue);
+    .quickCopyBtn:nth-child(1) {
+      background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+    }
+
+    .quickCopyBtn:nth-child(2) {
+      background: linear-gradient(135deg, #1268ff 0%, #0891b2 100%);
+    }
+
+    .quickCopyBtn:nth-child(3) {
+      background: linear-gradient(135deg, #047857 0%, #16a34a 100%);
+    }
+
+    .quickCopyBtn:nth-child(4) {
+      background: linear-gradient(135deg, #c2410c 0%, #e11d48 100%);
+    }
+
+    .quickCopyBtn:disabled {
+      background: #d7dee8;
+      color: #64748b;
+      opacity: 1;
     }
 
     .productCard {
