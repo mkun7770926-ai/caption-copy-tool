@@ -75,6 +75,14 @@
 
     .page.module-open {
       align-items: flex-start;
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .page.module-open .panel {
+      padding: 10px;
+      border-radius: 17px;
     }
 
     .shell {
@@ -169,22 +177,59 @@
 
     .moduleGrid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .moduleEntry {
-      min-height: 118px;
-      padding: 18px;
+      min-height: 88px;
+      padding: 13px 14px;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 20px;
+      align-items: center;
+      gap: 12px;
       border: 1px solid var(--line);
-      background: #fff;
       color: var(--text);
       text-align: left;
       box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
     }
 
+    .moduleEntryQuick {
+      background: linear-gradient(135deg, rgba(124, 58, 237, .10), #fff 50%);
+    }
+
+    .moduleEntryLinks {
+      background: linear-gradient(135deg, rgba(8, 145, 178, .11), #fff 50%);
+    }
+
+    .moduleEntry .moduleIcon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(16, 43, 92, .16);
+    }
+
+    .moduleEntryQuick .moduleIcon {
+      background: linear-gradient(135deg, #7c3aed, #c026d3);
+    }
+
+    .moduleEntryLinks .moduleIcon {
+      background: linear-gradient(135deg, #0891b2, #2563eb);
+    }
+
+    .moduleText {
+      min-width: 0;
+    }
+
     .moduleEntry strong,
-    .moduleEntry span {
+    .moduleText,
+    .moduleText > span,
+    .moduleArrow {
       display: block;
     }
 
@@ -192,43 +237,88 @@
       font-size: 20px;
     }
 
-    .moduleEntry span {
-      margin-top: 8px;
+    .moduleText > span {
+      margin-top: 4px;
       color: var(--muted);
       font-size: 13px;
       font-weight: 700;
-      line-height: 1.45;
+      line-height: 1.35;
     }
 
-    .topbar {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
+    .moduleArrow {
+      color: #64748b;
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1;
     }
 
-    .topbarActions {
-      display: flex;
+    .compactToolbar {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
       gap: 8px;
-      flex: 0 0 auto;
+      margin-bottom: 8px;
+      padding: 3px;
     }
 
-    .refreshBtn,
-    .backBtn {
+    .compactBack,
+    .compactToolbar .refreshBtn {
       width: auto;
-      min-width: 106px;
-      min-height: 46px;
-      padding: 10px 13px;
+      min-width: 56px;
+      min-height: 38px;
+      padding: 8px 10px;
       background: var(--soft);
       color: var(--text);
       border: 1px solid var(--line);
+      border-radius: 11px;
+      font-size: 13px;
+    }
+
+    .compactBack {
+      background: #fff;
+    }
+
+    .compactBrand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .miniLogo {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 9px;
+      background: linear-gradient(145deg, #101828, #123a8c);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .compactBrandText {
+      min-width: 0;
+      line-height: 1.1;
+    }
+
+    .compactBrandText strong,
+    .compactBrandText small {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .compactBrandText strong {
       font-size: 14px;
     }
 
-    .backBtn {
-      min-width: 82px;
-      background: #fff;
+    .compactBrandText small {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
     }
 
     .fieldLabel {
@@ -272,29 +362,27 @@
     .linkList {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 8px;
+      gap: 7px;
     }
 
     .quickList {
       display: grid;
-      gap: 8px;
-      margin-top: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
     }
 
     .quickMeta {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 8px;
+      gap: 2px;
     }
 
     .quickMeta div {
       min-width: 0;
-      padding: 9px 10px;
-      border-radius: 11px;
-      background: var(--soft);
+      padding: 2px 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.3;
       overflow-wrap: anywhere;
     }
 
@@ -305,13 +393,15 @@
     .quickActions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 5px;
     }
 
     .quickCopyBtn {
-      min-height: 48px;
+      min-height: 36px;
+      padding: 7px 6px;
+      border-radius: 10px;
       color: #fff;
-      font-size: 15px;
+      font-size: 13px;
     }
 
     .quickCopyBtn:nth-child(1) {
@@ -337,41 +427,31 @@
     }
 
     .productCard {
+      position: relative;
       display: grid;
-      gap: 9px;
-      padding: 12px 14px;
-      border-radius: 17px;
+      gap: 6px;
+      padding: 8px 9px 8px 36px;
+      border-radius: 14px;
       border: 1px solid var(--line);
       background: #fff;
       color: var(--text);
-      box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
+      box-shadow: 0 7px 16px rgba(16, 43, 92, .07);
     }
 
-    .productHead {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 9px;
-    }
-
-    .productName {
-      font-size: 17px;
-      font-weight: 900;
-      line-height: 1.25;
-    }
-
-    .productIndex {
-      flex: 0 0 auto;
-      min-width: 30px;
-      height: 26px;
-      padding: 0 7px;
+    .cornerIndex {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border-radius: 999px;
       background: rgba(18, 104, 255, .10);
       color: var(--blue);
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 900;
     }
 
@@ -396,19 +476,16 @@
     }
 
     .linkProductCard {
-      gap: 7px;
-      padding: 10px 11px;
-      border-radius: 14px;
-      box-shadow: 0 7px 16px rgba(16, 43, 92, .07);
+      gap: 6px;
     }
 
     .linkDetails {
       display: grid;
-      gap: 4px;
+      gap: 2px;
       min-width: 0;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
+      font-size: 12px;
+      line-height: 1.3;
     }
 
     .linkDetails div {
@@ -421,12 +498,12 @@
     }
 
     .copyPidBtn {
-      min-height: 42px;
-      padding: 10px 8px;
-      border-radius: 12px;
+      min-height: 36px;
+      padding: 7px 6px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .copyPidBtn:disabled {
@@ -436,12 +513,12 @@
     }
 
     .openLinkBtn {
-      min-height: 42px;
-      border-radius: 12px;
+      min-height: 36px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%);
       border: 0;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       text-decoration: none;
       display: inline-flex;
@@ -465,12 +542,15 @@
     }
 
     .status {
-      min-height: 22px;
-      margin-top: 12px;
+      margin-top: 7px;
       color: var(--ok);
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 900;
-      line-height: 1.55;
+      line-height: 1.4;
+    }
+
+    .status:empty {
+      display: none;
     }
 
     .status.warn {
@@ -478,7 +558,8 @@
     }
 
     @media (max-width: 620px) {
-      .linkList {
+      .linkList,
+      .quickList {
         grid-template-columns: 1fr;
       }
     }
@@ -494,33 +575,12 @@
         padding: 15px;
       }
 
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
-      .moduleGrid {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        align-items: flex-start;
-      }
-
-      .topbarActions {
-        flex-direction: column;
-      }
-
-      .refreshBtn,
-      .backBtn {
-        min-width: 88px;
-      }
-
       h1 {
         font-size: 22px;
       }
 
-      h2 {
-        font-size: 23px;
+      .compactBrandText strong {
+        font-size: 13px;
       }
     }
   </style>
@@ -529,46 +589,61 @@
   <div id="copyToast" class="toast" role="status" aria-live="polite"></div>
   <main id="page" class="page">
     <section class="panel">
-      <div class="brand">
-        <div class="logo">M</div>
-        <div>
-          <h1>Mark的小工具</h1>
-          <p class="sub">选择需要使用的工具。</p>
-        </div>
-      </div>
-
       <div id="homeView">
+        <div class="brand">
+          <div class="logo">M</div>
+          <div>
+            <h1>Mark的小工具</h1>
+            <p class="sub">选择需要使用的工具。</p>
+          </div>
+        </div>
         <div class="moduleGrid">
-          <button class="moduleEntry" type="button" data-open-view="quick">
-            <strong>一键复制</strong>
-            <span>查看手机和账号，复制对应字段内容</span>
+          <button class="moduleEntry moduleEntryQuick" type="button" data-open-view="quick">
+            <span class="moduleIcon" aria-hidden="true">⧉</span>
+            <span class="moduleText">
+              <strong>一键复制</strong>
+              <span>查看手机、账号并复制字段</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
           </button>
-          <button class="moduleEntry" type="button" data-open-view="links">
-            <strong>挂车链接</strong>
-            <span>查看商品，复制 PID 或打开链接</span>
+          <button class="moduleEntry moduleEntryLinks" type="button" data-open-view="links">
+            <span class="moduleIcon" aria-hidden="true">↗</span>
+            <span class="moduleText">
+              <strong>挂车链接</strong>
+              <span>复制 PID 或打开商品链接</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
           </button>
         </div>
       </div>
 
       <div id="quickView" hidden>
-        <div class="topbar">
-          <h2>一键复制</h2>
-          <div class="topbarActions">
-            <button class="backBtn" type="button" data-open-view="home">返回首页</button>
-            <button id="quickRefreshBtn" class="refreshBtn" type="button">刷新数据</button>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>一键复制</small>
+            </span>
           </div>
+          <button id="quickRefreshBtn" class="refreshBtn" type="button">刷新</button>
         </div>
         <div id="quickList" class="quickList"></div>
         <div id="quickStatus" class="status" role="status" aria-live="polite"></div>
       </div>
 
       <div id="linkView" hidden>
-        <div class="topbar">
-          <h2>挂车链接</h2>
-          <div class="topbarActions">
-            <button class="backBtn" type="button" data-open-view="home">返回首页</button>
-            <button id="refreshBtn" class="refreshBtn" type="button">刷新数据</button>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>挂车链接</small>
+            </span>
           </div>
+          <button id="refreshBtn" class="refreshBtn" type="button">刷新</button>
         </div>
 
         <div id="linkList" class="linkList"></div>
@@ -706,6 +781,7 @@
       if (!rows.length) return [];
 
       const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
       const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
       const pidIndex = findHeader(headers, ["PID"]);
       const linkIndex = findHeader(headers, ["挂车链接", "链接"]);
@@ -713,12 +789,13 @@
         throw new Error("CSV 缺少必要字段");
       }
 
-      return rows.slice(1).reduce((result, row) => {
+      return rows.slice(1).reduce((result, row, rowIndex) => {
         const productName = nameIndex >= 0 ? cleanCell(row[nameIndex]) : "";
         const pid = pidIndex >= 0 ? cleanPid(row[pidIndex]) : "";
         const link = cleanCell(row[linkIndex]);
         if (!link) return result;
         result.push({
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
           productName,
           pid,
           link
@@ -817,7 +894,7 @@
         }).join("");
 
         return '<div class="productCard">' +
-          '<div class="productHead"><span class="productIndex">' + escapeHtml(item.index) + '</span></div>' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
           '<div class="quickMeta">' +
           '<div><strong>手机：</strong>' + escapeHtml(item.phone || "无") + '</div>' +
           '<div><strong>账号：</strong>' + escapeHtml(item.account || "无") + '</div>' +
@@ -842,6 +919,7 @@
 
       els.linkList.innerHTML = state.items.map((item) => {
         return '<div class="productCard linkProductCard">' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
           '<div class="linkDetails">' +
           '<div><strong>商品名称：</strong>' + escapeHtml(item.productName || "无") + '</div>' +
           '<div><strong>PID：</strong>' + escapeHtml(item.pid || "无") + '</div>' +
