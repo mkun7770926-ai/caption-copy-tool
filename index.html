@@ -362,13 +362,15 @@
     .linkList {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
+      column-gap: 7px;
+      row-gap: 10px;
     }
 
     .quickList {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
+      column-gap: 7px;
+      row-gap: 10px;
     }
 
     .quickMeta {
@@ -430,7 +432,7 @@
       position: relative;
       display: grid;
       gap: 6px;
-      padding: 8px 9px 8px 36px;
+      padding: 11px 9px 8px;
       border-radius: 14px;
       border: 1px solid var(--line);
       background: #fff;
@@ -440,18 +442,20 @@
 
     .cornerIndex {
       position: absolute;
-      top: 8px;
-      left: 8px;
+      top: -8px;
+      left: 10px;
       min-width: 22px;
-      height: 22px;
+      height: 18px;
       padding: 0 5px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border-radius: 999px;
-      background: rgba(18, 104, 255, .10);
+      border: 1px solid rgba(18, 104, 255, .25);
+      background: #fff;
       color: var(--blue);
-      font-size: 11px;
+      box-shadow: 0 2px 6px rgba(16, 43, 92, .08);
+      font-size: 10px;
       font-weight: 900;
     }
 
