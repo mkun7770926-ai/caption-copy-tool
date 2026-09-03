@@ -515,40 +515,40 @@
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .copyTextBtn {
-      width: 42px;
-      height: 42px;
-      min-height: 42px;
-      justify-self: center;
-      padding: 0;
-      border-radius: 50%;
+      width: 100%;
+      height: 44px;
+      min-height: 44px;
+      padding: 0 2px;
+      border-radius: 10px;
       color: #fff;
-      font-size: 15px;
+      font-size: 12px;
       line-height: 1;
-      box-shadow: 0 6px 13px rgba(16, 43, 92, .14);
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(16, 43, 92, .10);
     }
 
     .copyTextBtn:nth-child(1) {
-      background: linear-gradient(135deg, #7c3aed, #db2777);
+      background: linear-gradient(135deg, #4f46e5, #2563eb);
     }
 
     .copyTextBtn:nth-child(2) {
-      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
     }
 
     .copyTextBtn:nth-child(3) {
-      background: linear-gradient(135deg, #059669, #14b8a6);
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
     }
 
     .copyTextBtn:nth-child(4) {
-      background: linear-gradient(135deg, #f59e0b, #f97316);
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
     }
 
     .copyTextBtn:nth-child(5) {
-      background: linear-gradient(135deg, #e11d48, #f43f5e);
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
     }
 
     .copyTextBtn:disabled {
@@ -662,7 +662,9 @@
     }
 
     .openLinkBtn.is-disabled {
-      opacity: .48;
+      background: #d7dee8;
+      color: #64748b;
+      opacity: 1;
       pointer-events: none;
     }
 
@@ -704,13 +706,13 @@
 
     @media (max-width: 340px) {
       .copyTextActions {
-        gap: 3px;
+        gap: 2px;
       }
 
       .copyTextBtn {
-        width: 38px;
-        height: 38px;
-        min-height: 38px;
+        height: 42px;
+        min-height: 42px;
+        font-size: 11px;
       }
     }
 
@@ -1008,15 +1010,15 @@
       const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
       const pidIndex = findHeader(headers, ["PID"]);
       const linkIndex = findHeader(headers, ["挂车链接", "链接"]);
-      if (linkIndex === -1) {
+      if (pidIndex === -1 && linkIndex === -1) {
         throw new Error("CSV 缺少必要字段");
       }
 
       return rows.slice(1).reduce((result, row, rowIndex) => {
         const productName = nameIndex >= 0 ? cleanCell(row[nameIndex]) : "";
         const pid = pidIndex >= 0 ? cleanPid(row[pidIndex]) : "";
-        const link = cleanCell(row[linkIndex]);
-        if (!link) return result;
+        const link = linkIndex >= 0 ? cleanCell(row[linkIndex]) : "";
+        if (!pid && !link) return result;
         result.push({
           index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
           productName,
@@ -1170,6 +1172,9 @@
       }
 
       els.linkList.innerHTML = state.items.map((item) => {
+        const openLink = item.link
+          ? '<a class="openLinkBtn" href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener">打开链接</a>'
+          : '<a class="openLinkBtn is-disabled" aria-disabled="true">打开链接</a>';
         return '<div class="productCard linkProductCard">' +
           '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
           '<div class="linkDetails">' +
@@ -1178,7 +1183,7 @@
           '</div>' +
           '<div class="productActions">' +
           '<button class="copyPidBtn" type="button" data-copy-pid="' + escapeHtml(item.pid) + '"' + (item.pid ? "" : " disabled") + '>复制PID</button>' +
-          '<a class="openLinkBtn" href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener">打开链接</a>' +
+          openLink +
           '</div>' +
           '</div>';
       }).join("");
@@ -1201,7 +1206,7 @@
         const buttons = item.copies.map((value, copyIndex) => {
           const copyNumber = copyIndex + 1;
           const label = "复制文案" + copyNumber;
-          return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>' + copyNumber + '</button>';
+          return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>文案' + copyNumber + '</button>';
         }).join("");
 
         return '<div class="productCard copyProductCard">' +
