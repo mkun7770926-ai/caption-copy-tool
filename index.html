@@ -116,6 +116,38 @@
       transform: translate(-50%, 0);
     }
 
+    .toastTitle,
+    .toastPreview {
+      display: block;
+    }
+
+    .toastPreview {
+      display: none;
+    }
+
+    .toast.has-preview {
+      width: min(420px, calc(100vw - 28px));
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .toast.has-preview .toastTitle {
+      text-align: center;
+    }
+
+    .toast.has-preview .toastPreview {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: rgba(255, 255, 255, .76);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .panel {
       width: 100%;
       padding: 18px;
@@ -202,6 +234,10 @@
       background: linear-gradient(135deg, rgba(8, 145, 178, .11), #fff 50%);
     }
 
+    .moduleEntryCopy {
+      background: linear-gradient(135deg, rgba(236, 72, 153, .11), #fff 50%);
+    }
+
     .moduleEntry .moduleIcon {
       width: 42px;
       height: 42px;
@@ -220,6 +256,10 @@
 
     .moduleEntryLinks .moduleIcon {
       background: linear-gradient(135deg, #0891b2, #2563eb);
+    }
+
+    .moduleEntryCopy .moduleIcon {
+      background: linear-gradient(135deg, #db2777, #7c3aed);
     }
 
     .moduleText {
@@ -366,7 +406,8 @@
       row-gap: 10px;
     }
 
-    .quickList {
+    .quickList,
+    .copyList {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: 7px;
@@ -425,6 +466,95 @@
     .quickCopyBtn:disabled {
       background: #d7dee8;
       color: #64748b;
+      opacity: 1;
+    }
+
+    .productCard.copyProductCard {
+      gap: 7px;
+      padding-top: 12px;
+    }
+
+    .copyProductName {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .copyProductName strong {
+      color: #344054;
+      font-weight: 900;
+    }
+
+    .pidCopyBox {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid rgba(18, 104, 255, .18);
+      border-radius: 10px;
+      background: rgba(18, 104, 255, .07);
+      color: #31578e;
+      font-size: 12px;
+      line-height: 1.3;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+
+    .pidCopyBox strong {
+      color: #24446f;
+    }
+
+    .pidCopyBox:disabled {
+      background: #eef2f6;
+      border-color: #d7dee8;
+      color: #7b8798;
+      opacity: 1;
+    }
+
+    .copyTextActions {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copyTextBtn {
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      justify-self: center;
+      padding: 0;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 15px;
+      line-height: 1;
+      box-shadow: 0 6px 13px rgba(16, 43, 92, .14);
+    }
+
+    .copyTextBtn:nth-child(1) {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+    }
+
+    .copyTextBtn:nth-child(2) {
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+    }
+
+    .copyTextBtn:nth-child(3) {
+      background: linear-gradient(135deg, #059669, #14b8a6);
+    }
+
+    .copyTextBtn:nth-child(4) {
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+    }
+
+    .copyTextBtn:nth-child(5) {
+      background: linear-gradient(135deg, #e11d48, #f43f5e);
+    }
+
+    .copyTextBtn:disabled {
+      background: #d7dee8;
+      color: #64748b;
+      box-shadow: none;
       opacity: 1;
     }
 
@@ -566,8 +696,21 @@
 
     @media (max-width: 620px) {
       .linkList,
-      .quickList {
+      .quickList,
+      .copyList {
         grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .copyTextActions {
+        gap: 3px;
+      }
+
+      .copyTextBtn {
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
       }
     }
 
@@ -621,6 +764,14 @@
             </span>
             <span class="moduleArrow" aria-hidden="true">›</span>
           </button>
+          <button class="moduleEntry moduleEntryCopy" type="button" data-open-view="copy">
+            <span class="moduleIcon" aria-hidden="true">文</span>
+            <span class="moduleText">
+              <strong>文案复制</strong>
+              <span>选择商品并复制对应文案</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
+          </button>
         </div>
       </div>
 
@@ -656,12 +807,30 @@
         <div id="linkList" class="linkList"></div>
         <div id="status" class="status" role="status" aria-live="polite"></div>
       </div>
+
+      <div id="copyView" hidden>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>文案复制</small>
+            </span>
+          </div>
+          <button id="copyRefreshBtn" class="refreshBtn" type="button">刷新</button>
+        </div>
+
+        <div id="copyList" class="copyList"></div>
+        <div id="copyStatus" class="status" role="status" aria-live="polite"></div>
+      </div>
     </section>
   </main>
 
   <script>
     const QUICK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
     const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
+    const COPY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=648078346&single=true&output=csv";
     const STORAGE_PREFIX = "mark_tools_link_only_v1_";
 
     const state = {
@@ -671,6 +840,12 @@
     };
 
     const quickState = {
+      items: [],
+      loading: false,
+      loaded: false
+    };
+
+    const copyState = {
       items: [],
       loading: false,
       loaded: false
@@ -692,12 +867,16 @@
         "homeView",
         "quickView",
         "linkView",
+        "copyView",
         "quickRefreshBtn",
         "quickList",
         "quickStatus",
         "refreshBtn",
         "linkList",
-        "status"
+        "status",
+        "copyRefreshBtn",
+        "copyList",
+        "copyStatus"
       ].forEach((id) => { els[id] = document.getElementById(id); });
     }
 
@@ -708,6 +887,7 @@
       });
       els.quickRefreshBtn.addEventListener("click", () => loadQuick(true));
       els.refreshBtn.addEventListener("click", () => loadLinks(true));
+      els.copyRefreshBtn.addEventListener("click", () => loadCopy(true));
       els.linkList.addEventListener("click", (event) => {
         const pidButton = event.target.closest("[data-copy-pid]");
         if (pidButton) copyPid(pidButton.dataset.copyPid);
@@ -721,19 +901,37 @@
           copyQuickField(item.fields[fieldNumber - 1], fieldNumber);
         }
       });
+      els.copyList.addEventListener("click", (event) => {
+        const pidButton = event.target.closest("[data-copy-module-pid]");
+        if (pidButton) {
+          copyModulePid(pidButton.dataset.copyModulePid);
+          return;
+        }
+
+        const textButton = event.target.closest("[data-copy-row][data-copy-number]");
+        if (!textButton) return;
+        const item = copyState.items.find((currentItem) => currentItem.rowKey === textButton.dataset.copyRow);
+        const copyNumber = Number(textButton.dataset.copyNumber);
+        if (item && copyNumber >= 1 && copyNumber <= 5) {
+          copyModuleText(item.copies[copyNumber - 1], copyNumber);
+        }
+      });
     }
 
     function openView(viewName) {
       const isQuick = viewName === "quick";
       const isLinks = viewName === "links";
-      els.homeView.hidden = isQuick || isLinks;
+      const isCopy = viewName === "copy";
+      els.homeView.hidden = isQuick || isLinks || isCopy;
       els.quickView.hidden = !isQuick;
       els.linkView.hidden = !isLinks;
-      els.page.classList.toggle("module-open", isQuick || isLinks);
+      els.copyView.hidden = !isCopy;
+      els.page.classList.toggle("module-open", isQuick || isLinks || isCopy);
       window.scrollTo(0, 0);
 
       if (isQuick && !quickState.loaded && !quickState.loading) loadQuick(false);
       if (isLinks && !state.loaded && !state.loading) loadLinks(false);
+      if (isCopy && !copyState.loaded && !copyState.loading) loadCopy(false);
     }
 
     function hydrateState() {
@@ -773,6 +971,24 @@
         state.loading = false;
         state.loaded = true;
         renderLinks();
+      }
+    }
+
+    async function loadCopy(forceRefresh) {
+      copyState.loading = true;
+      renderCopy();
+      setCopyStatus(forceRefresh ? "正在刷新文案复制数据..." : "正在读取文案复制数据...", false, 0);
+
+      try {
+        copyState.items = parseCopyCsv(await fetchCsv(COPY_CSV_URL, forceRefresh));
+        setCopyStatus("已读取 " + copyState.items.length + " 条文案记录。");
+      } catch (error) {
+        copyState.items = [];
+        setCopyStatus("文案复制数据读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        copyState.loading = false;
+        copyState.loaded = true;
+        renderCopy();
       }
     }
 
@@ -833,6 +1049,35 @@
           phone: phoneIndex >= 0 ? cleanCell(row[phoneIndex]) : "",
           account: accountIndex >= 0 ? cleanCell(row[accountIndex]) : "",
           fields
+        });
+        return result;
+      }, []);
+    }
+
+    function parseCopyCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
+      const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
+      const pidIndex = findHeader(headers, ["PID"]);
+      const copyIndexes = [1, 2, 3, 4, 5].map((number) => findHeader(headers, ["文案" + number]));
+      if (copyIndexes.every((index) => index === -1)) {
+        throw new Error("CSV 缺少文案字段");
+      }
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const productName = nameIndex >= 0 ? cleanCell(row[nameIndex]) : "";
+        const pid = pidIndex >= 0 ? cleanPid(row[pidIndex]) : "";
+        const copies = copyIndexes.map((index) => index >= 0 ? cleanCell(row[index]) : "");
+        if (![productName, pid, ...copies].some(Boolean)) return result;
+        result.push({
+          rowKey: String(rowIndex),
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName,
+          pid,
+          copies
         });
         return result;
       }, []);
@@ -939,6 +1184,35 @@
       }).join("");
     }
 
+    function renderCopy() {
+      els.copyRefreshBtn.disabled = copyState.loading;
+
+      if (copyState.loading) {
+        els.copyList.innerHTML = '<div class="empty">正在读取文案复制数据...</div>';
+        return;
+      }
+
+      if (!copyState.items.length) {
+        els.copyList.innerHTML = '<div class="empty">没有读取到文案内容，请检查 Google 表格。</div>';
+        return;
+      }
+
+      els.copyList.innerHTML = copyState.items.map((item) => {
+        const buttons = item.copies.map((value, copyIndex) => {
+          const copyNumber = copyIndex + 1;
+          const label = "复制文案" + copyNumber;
+          return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>' + copyNumber + '</button>';
+        }).join("");
+
+        return '<div class="productCard copyProductCard">' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
+          '<div class="copyProductName"><strong>商品名称：</strong>' + escapeHtml(item.productName || "无") + '</div>' +
+          '<button class="pidCopyBox" type="button" data-copy-module-pid="' + escapeHtml(item.pid) + '"' + (item.pid ? "" : " disabled") + '><strong>PID：</strong>' + escapeHtml(item.pid || "无") + '</button>' +
+          '<div class="copyTextActions">' + buttons + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
     async function copyPid(pid) {
       if (!pid) return;
       const ok = await copyText(pid);
@@ -951,6 +1225,31 @@
       const ok = await copyText(value);
       if (ok) showToast("已复制字段" + fieldNumber);
       setQuickStatus(ok ? "已复制字段" + fieldNumber + "。" : "自动复制失败，请长按后手动复制。", !ok);
+    }
+
+    async function copyModulePid(pid) {
+      if (!pid) return;
+      const ok = await copyText(pid);
+      if (ok) {
+        showToast("PID 已复制");
+      } else {
+        setCopyStatus("自动复制失败，请手动复制 PID：" + pid, true, 0);
+      }
+    }
+
+    async function copyModuleText(value, copyNumber) {
+      if (!value) return;
+      const ok = await copyText(value);
+      if (ok) {
+        showToast("文案" + copyNumber + " 已复制", createCopyPreview(value), 2200);
+      } else {
+        setCopyStatus("自动复制失败，请长按后手动复制。", true, 0);
+      }
+    }
+
+    function createCopyPreview(value) {
+      const normalized = cleanCell(value).replace(/\s+/g, " ");
+      return Array.from(normalized).slice(0, 40).join("") + "…";
     }
 
     async function copyText(text) {
@@ -1007,13 +1306,36 @@
       }
     }
 
-    function showToast(text) {
-      els.copyToast.textContent = text;
+    function setCopyStatus(text, warning, duration) {
+      els.copyStatus.textContent = text || "";
+      els.copyStatus.className = warning ? "status warn" : "status";
+      clearTimeout(els.copyStatus.__timer);
+      if (text && duration !== 0) {
+        els.copyStatus.__timer = setTimeout(() => {
+          els.copyStatus.textContent = "";
+          els.copyStatus.className = "status";
+        }, duration || 1800);
+      }
+    }
+
+    function showToast(text, preview, duration) {
+      els.copyToast.textContent = "";
+      const title = document.createElement("span");
+      title.className = "toastTitle";
+      title.textContent = text;
+      els.copyToast.appendChild(title);
+      els.copyToast.classList.toggle("has-preview", Boolean(preview));
+      if (preview) {
+        const previewText = document.createElement("span");
+        previewText.className = "toastPreview";
+        previewText.textContent = preview;
+        els.copyToast.appendChild(previewText);
+      }
       els.copyToast.classList.add("show");
       clearTimeout(els.copyToast.__timer);
       els.copyToast.__timer = setTimeout(() => {
         els.copyToast.classList.remove("show");
-      }, 1300);
+      }, duration || (preview ? 2200 : 1300));
     }
 
     function findHeader(headers, names) {
