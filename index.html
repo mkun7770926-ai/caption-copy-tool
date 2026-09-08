@@ -488,24 +488,85 @@
     }
 
     .pidCopyBox {
-      display: block;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 34px;
+      align-items: center;
+      gap: 6px;
       width: 100%;
       min-height: 40px;
-      padding: 9px 10px;
+      padding: 3px 4px 3px 10px;
       border: 1px solid rgba(18, 104, 255, .18);
       border-radius: 10px;
       background: rgba(18, 104, 255, .07);
       color: #31578e;
       font-size: 12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pidOpenArea {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      min-width: 0;
+      color: #31578e;
       line-height: 1.3;
       text-align: left;
       text-decoration: none;
       overflow-wrap: anywhere;
+    }
+
+    .pidOpenArea strong {
+      color: #24446f;
+    }
+
+    .pidMiniCopyBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0;
+      border: 1px solid rgba(46, 133, 255, .24);
+      border-radius: 8px;
+      background: linear-gradient(145deg, #7ebdff, #397ff2);
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(37, 103, 210, .16);
+      cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .pidCopyBox strong {
-      color: #24446f;
+    .pidMiniCopyBtn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px rgba(37, 103, 210, .15);
+    }
+
+    .pidMiniCopyIcon {
+      position: relative;
+      width: 16px;
+      height: 16px;
+    }
+
+    .pidMiniCopyIcon::before,
+    .pidMiniCopyIcon::after {
+      position: absolute;
+      width: 9px;
+      height: 10px;
+      border: 1.6px solid currentColor;
+      border-radius: 2px;
+      content: "";
+    }
+
+    .pidMiniCopyIcon::before {
+      top: 1px;
+      left: 1px;
+      opacity: .65;
+    }
+
+    .pidMiniCopyIcon::after {
+      right: 1px;
+      bottom: 1px;
+      background: #4d8cf3;
     }
 
     .pidCopyBox.is-disabled {
@@ -513,7 +574,26 @@
       border-color: #d7dee8;
       color: #7b8798;
       opacity: 1;
-      pointer-events: none;
+    }
+
+    .pidCopyBox.is-disabled .pidOpenArea {
+      color: #7b8798;
+    }
+
+    .pidCopyBox.is-disabled .pidOpenArea strong {
+      color: #7b8798;
+    }
+
+    .pidCopyBox.is-disabled .pidMiniCopyBtn {
+      border-color: #d4dbe5;
+      background: #dfe4eb;
+      color: #9aa4b2;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .pidCopyBox.is-disabled .pidMiniCopyIcon::after {
+      background: #dfe4eb;
     }
 
     .copyTextActions {
@@ -910,6 +990,11 @@
         }
       });
       els.copyList.addEventListener("click", (event) => {
+        const pidButton = event.target.closest("[data-copy-module-pid]");
+        if (pidButton) {
+          copyModulePid(pidButton.dataset.copyModulePid);
+          return;
+        }
         const textButton = event.target.closest("[data-copy-row][data-copy-number]");
         if (!textButton) return;
         const item = copyState.items.find((currentItem) => currentItem.rowKey === textButton.dataset.copyRow);
@@ -1209,8 +1294,8 @@
           return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>文案' + copyNumber + '</button>';
         }).join("");
         const pidBox = item.pid
-          ? '<a class="pidCopyBox" href="' + PRODUCT_URL_PREFIX + escapeHtml(item.pid) + '" target="_blank" rel="noopener"><strong>PID：</strong>' + escapeHtml(item.pid) + '</a>'
-          : '<span class="pidCopyBox is-disabled" aria-disabled="true"><strong>PID：</strong>无</span>';
+          ? '<div class="pidCopyBox"><a class="pidOpenArea" href="' + PRODUCT_URL_PREFIX + escapeHtml(item.pid) + '" target="_blank" rel="noopener"><strong>PID：</strong>' + escapeHtml(item.pid) + '</a><button class="pidMiniCopyBtn" type="button" data-copy-module-pid="' + escapeHtml(item.pid) + '" aria-label="复制PID" title="复制PID"><span class="pidMiniCopyIcon" aria-hidden="true"></span></button></div>'
+          : '<div class="pidCopyBox is-disabled" aria-disabled="true"><span class="pidOpenArea"><strong>PID：</strong>无</span><button class="pidMiniCopyBtn" type="button" aria-label="无PID可复制" title="无PID可复制" disabled><span class="pidMiniCopyIcon" aria-hidden="true"></span></button></div>';
 
         return '<div class="productCard copyProductCard">' +
           '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
@@ -1233,6 +1318,16 @@
       const ok = await copyText(value);
       if (ok) showToast("已复制字段" + fieldNumber);
       setQuickStatus(ok ? "已复制字段" + fieldNumber + "。" : "自动复制失败，请长按后手动复制。", !ok);
+    }
+
+    async function copyModulePid(pid) {
+      if (!pid) return;
+      const ok = await copyText(pid);
+      if (ok) {
+        showToast("PID 已复制");
+      } else {
+        setCopyStatus("自动复制失败，请手动复制 PID：" + pid, true, 0);
+      }
     }
 
     async function copyModuleText(value, copyNumber) {
