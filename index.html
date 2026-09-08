@@ -488,8 +488,10 @@
     }
 
     .pidCopyBox {
-      min-height: 36px;
-      padding: 7px 10px;
+      display: block;
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 10px;
       border: 1px solid rgba(18, 104, 255, .18);
       border-radius: 10px;
       background: rgba(18, 104, 255, .07);
@@ -497,18 +499,21 @@
       font-size: 12px;
       line-height: 1.3;
       text-align: left;
+      text-decoration: none;
       overflow-wrap: anywhere;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .pidCopyBox strong {
       color: #24446f;
     }
 
-    .pidCopyBox:disabled {
+    .pidCopyBox.is-disabled {
       background: #eef2f6;
       border-color: #d7dee8;
       color: #7b8798;
       opacity: 1;
+      pointer-events: none;
     }
 
     .copyTextActions {
@@ -833,6 +838,7 @@
     const QUICK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
     const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
     const COPY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=648078346&single=true&output=csv";
+    const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
     const STORAGE_PREFIX = "mark_tools_link_only_v1_";
 
     const state = {
@@ -904,12 +910,6 @@
         }
       });
       els.copyList.addEventListener("click", (event) => {
-        const pidButton = event.target.closest("[data-copy-module-pid]");
-        if (pidButton) {
-          copyModulePid(pidButton.dataset.copyModulePid);
-          return;
-        }
-
         const textButton = event.target.closest("[data-copy-row][data-copy-number]");
         if (!textButton) return;
         const item = copyState.items.find((currentItem) => currentItem.rowKey === textButton.dataset.copyRow);
@@ -1208,11 +1208,14 @@
           const label = "复制文案" + copyNumber;
           return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>文案' + copyNumber + '</button>';
         }).join("");
+        const pidBox = item.pid
+          ? '<a class="pidCopyBox" href="' + PRODUCT_URL_PREFIX + escapeHtml(item.pid) + '" target="_blank" rel="noopener"><strong>PID：</strong>' + escapeHtml(item.pid) + '</a>'
+          : '<span class="pidCopyBox is-disabled" aria-disabled="true"><strong>PID：</strong>无</span>';
 
         return '<div class="productCard copyProductCard">' +
           '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
           '<div class="copyProductName"><strong>商品名称：</strong>' + escapeHtml(item.productName || "无") + '</div>' +
-          '<button class="pidCopyBox" type="button" data-copy-module-pid="' + escapeHtml(item.pid) + '"' + (item.pid ? "" : " disabled") + '><strong>PID：</strong>' + escapeHtml(item.pid || "无") + '</button>' +
+          pidBox +
           '<div class="copyTextActions">' + buttons + '</div>' +
           '</div>';
       }).join("");
@@ -1230,16 +1233,6 @@
       const ok = await copyText(value);
       if (ok) showToast("已复制字段" + fieldNumber);
       setQuickStatus(ok ? "已复制字段" + fieldNumber + "。" : "自动复制失败，请长按后手动复制。", !ok);
-    }
-
-    async function copyModulePid(pid) {
-      if (!pid) return;
-      const ok = await copyText(pid);
-      if (ok) {
-        showToast("PID 已复制");
-      } else {
-        setCopyStatus("自动复制失败，请手动复制 PID：" + pid, true, 0);
-      }
     }
 
     async function copyModuleText(value, copyNumber) {
