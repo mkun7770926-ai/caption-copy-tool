@@ -1,0 +1,1468 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mark的小工具">
+  <title>Mark的小工具</title>
+  <style>
+    :root {
+      --bg: #eef4fb;
+      --panel: rgba(255, 255, 255, .88);
+      --text: #101828;
+      --muted: #64748b;
+      --line: rgba(156, 178, 207, .42);
+      --blue: #1268ff;
+      --soft: #f3f7fc;
+      --ok: #047857;
+      --warn: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 4%, rgba(65, 190, 255, .34), transparent 26%),
+        radial-gradient(circle at 88% 18%, rgba(18, 104, 255, .24), transparent 26%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    button, select, input {
+      font: inherit;
+      min-height: 54px;
+      border-radius: 15px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    button:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+    }
+
+    select, input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 0 13px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 760px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 14px max(26px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+    }
+
+    .page.module-open {
+      align-items: flex-start;
+      padding-top: max(8px, env(safe-area-inset-top));
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .page.module-open .panel {
+      padding: 10px;
+      border-radius: 17px;
+    }
+
+    .shell {
+      width: 100%;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 50;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translate(-50%, -12px);
+      min-width: 128px;
+      max-width: calc(100vw - 28px);
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(16, 24, 40, .94);
+      color: #fff;
+      box-shadow: 0 14px 36px rgba(16, 43, 92, .22);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.3;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toastTitle,
+    .toastPreview {
+      display: block;
+    }
+
+    .toastPreview {
+      display: none;
+    }
+
+    .toast.has-preview {
+      width: min(420px, calc(100vw - 28px));
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .toast.has-preview .toastTitle {
+      text-align: center;
+    }
+
+    .toast.has-preview .toastPreview {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: rgba(255, 255, 255, .76);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .panel {
+      width: 100%;
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, .86);
+      box-shadow: 0 22px 60px rgba(16, 43, 92, .14);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #101828, #123a8c);
+      color: #fff;
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(16, 43, 92, .24);
+      flex: 0 0 auto;
+    }
+
+    h1, h2, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 25px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .moduleGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .moduleEntry {
+      min-height: 88px;
+      padding: 13px 14px;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 20px;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      text-align: left;
+      box-shadow: 0 10px 22px rgba(16, 43, 92, .08);
+    }
+
+    .moduleEntryQuick {
+      background: linear-gradient(135deg, rgba(124, 58, 237, .10), #fff 50%);
+    }
+
+    .moduleEntryLinks {
+      background: linear-gradient(135deg, rgba(8, 145, 178, .11), #fff 50%);
+    }
+
+    .moduleEntryCopy {
+      background: linear-gradient(135deg, rgba(236, 72, 153, .11), #fff 50%);
+    }
+
+    .moduleEntry .moduleIcon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(16, 43, 92, .16);
+    }
+
+    .moduleEntryQuick .moduleIcon {
+      background: linear-gradient(135deg, #7c3aed, #c026d3);
+    }
+
+    .moduleEntryLinks .moduleIcon {
+      background: linear-gradient(135deg, #0891b2, #2563eb);
+    }
+
+    .moduleEntryCopy .moduleIcon {
+      background: linear-gradient(135deg, #db2777, #7c3aed);
+    }
+
+    .moduleText {
+      min-width: 0;
+    }
+
+    .moduleEntry strong,
+    .moduleText,
+    .moduleText > span,
+    .moduleArrow {
+      display: block;
+    }
+
+    .moduleEntry strong {
+      font-size: 20px;
+    }
+
+    .moduleText > span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .moduleArrow {
+      color: #64748b;
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .compactToolbar {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 3px;
+    }
+
+    .compactBack,
+    .compactToolbar .refreshBtn {
+      width: auto;
+      min-width: 56px;
+      min-height: 38px;
+      padding: 8px 10px;
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      font-size: 13px;
+    }
+
+    .compactBack {
+      background: #fff;
+    }
+
+    .compactBrand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .miniLogo {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 9px;
+      background: linear-gradient(145deg, #101828, #123a8c);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .compactBrandText {
+      min-width: 0;
+      line-height: 1.1;
+    }
+
+    .compactBrandText strong,
+    .compactBrandText small {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .compactBrandText strong {
+      font-size: 14px;
+    }
+
+    .compactBrandText small {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .fieldLabel {
+      display: block;
+      margin: 14px 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .stat {
+      min-height: 76px;
+      padding: 11px 8px;
+      border-radius: 15px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .linkList {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 7px;
+      row-gap: 10px;
+    }
+
+    .quickList,
+    .copyList {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 7px;
+      row-gap: 10px;
+    }
+
+    .quickMeta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .quickMeta div {
+      min-width: 0;
+      padding: 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .quickMeta strong {
+      color: #344054;
+    }
+
+    .quickActions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .quickCopyBtn {
+      min-height: 36px;
+      padding: 7px 6px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .quickCopyBtn:nth-child(1) {
+      background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+    }
+
+    .quickCopyBtn:nth-child(2) {
+      background: linear-gradient(135deg, #1268ff 0%, #0891b2 100%);
+    }
+
+    .quickCopyBtn:nth-child(3) {
+      background: linear-gradient(135deg, #047857 0%, #16a34a 100%);
+    }
+
+    .quickCopyBtn:nth-child(4) {
+      background: linear-gradient(135deg, #c2410c 0%, #e11d48 100%);
+    }
+
+    .quickCopyBtn:disabled {
+      background: #d7dee8;
+      color: #64748b;
+      opacity: 1;
+    }
+
+    .productCard.copyProductCard {
+      gap: 7px;
+      padding-top: 12px;
+    }
+
+    .copyProductName {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .copyProductName strong {
+      color: #344054;
+      font-weight: 900;
+    }
+
+    .pidCopyBox {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 34px;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      min-height: 40px;
+      padding: 3px 4px 3px 10px;
+      border: 1px solid rgba(18, 104, 255, .18);
+      border-radius: 10px;
+      background: rgba(18, 104, 255, .07);
+      color: #31578e;
+      font-size: 12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pidOpenArea {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      min-width: 0;
+      color: #31578e;
+      line-height: 1.3;
+      text-align: left;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .pidOpenArea strong {
+      color: #24446f;
+    }
+
+    .pidMiniCopyBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0;
+      border: 1px solid rgba(46, 133, 255, .24);
+      border-radius: 8px;
+      background: linear-gradient(145deg, #7ebdff, #397ff2);
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(37, 103, 210, .16);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pidMiniCopyBtn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px rgba(37, 103, 210, .15);
+    }
+
+    .pidMiniCopyIcon {
+      position: relative;
+      width: 16px;
+      height: 16px;
+    }
+
+    .pidMiniCopyIcon::before,
+    .pidMiniCopyIcon::after {
+      position: absolute;
+      width: 9px;
+      height: 10px;
+      border: 1.6px solid currentColor;
+      border-radius: 2px;
+      content: "";
+    }
+
+    .pidMiniCopyIcon::before {
+      top: 1px;
+      left: 1px;
+      opacity: .65;
+    }
+
+    .pidMiniCopyIcon::after {
+      right: 1px;
+      bottom: 1px;
+      background: #4d8cf3;
+    }
+
+    .pidCopyBox.is-disabled {
+      background: #eef2f6;
+      border-color: #d7dee8;
+      color: #7b8798;
+      opacity: 1;
+    }
+
+    .pidCopyBox.is-disabled .pidOpenArea {
+      color: #7b8798;
+    }
+
+    .pidCopyBox.is-disabled .pidOpenArea strong {
+      color: #7b8798;
+    }
+
+    .pidCopyBox.is-disabled .pidMiniCopyBtn {
+      border-color: #d4dbe5;
+      background: #dfe4eb;
+      color: #9aa4b2;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .pidCopyBox.is-disabled .pidMiniCopyIcon::after {
+      background: #dfe4eb;
+    }
+
+    .copyTextActions {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copyTextBtn {
+      width: 100%;
+      height: 44px;
+      min-height: 44px;
+      padding: 0 2px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1;
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(16, 43, 92, .10);
+    }
+
+    .copyTextBtn:nth-child(1) {
+      background: linear-gradient(135deg, #4f46e5, #2563eb);
+    }
+
+    .copyTextBtn:nth-child(2) {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+    }
+
+    .copyTextBtn:nth-child(3) {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    }
+
+    .copyTextBtn:nth-child(4) {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+    }
+
+    .copyTextBtn:nth-child(5) {
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
+    }
+
+    .copyTextBtn:disabled {
+      background: #d7dee8;
+      color: #64748b;
+      box-shadow: none;
+      opacity: 1;
+    }
+
+    .productCard {
+      position: relative;
+      display: grid;
+      gap: 6px;
+      padding: 11px 9px 8px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 7px 16px rgba(16, 43, 92, .07);
+    }
+
+    .cornerIndex {
+      position: absolute;
+      top: -9px;
+      left: 3px;
+      min-width: 24px;
+      height: 20px;
+      padding: 0 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(18, 104, 255, .25);
+      background: #fff;
+      color: var(--blue);
+      box-shadow: 0 2px 6px rgba(16, 43, 92, .08);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .productMeta {
+      display: grid;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .productMeta strong {
+      color: #344054;
+      font-weight: 900;
+    }
+
+    .productActions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .linkProductCard {
+      gap: 6px;
+    }
+
+    .linkDetails {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .linkDetails div {
+      overflow-wrap: anywhere;
+    }
+
+    .linkDetails strong {
+      color: #344054;
+      font-weight: 900;
+    }
+
+    .copyPidBtn {
+      min-height: 36px;
+      padding: 7px 6px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .copyPidBtn:disabled {
+      background: #d7dee8;
+      color: #64748b;
+      opacity: 1;
+    }
+
+    .openLinkBtn {
+      min-height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0891b2 0%, #2563eb 100%);
+      border: 0;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .openLinkBtn.is-disabled {
+      background: #d7dee8;
+      color: #64748b;
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 16px;
+      border-radius: 15px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .status {
+      margin-top: 7px;
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .status:empty {
+      display: none;
+    }
+
+    .status.warn {
+      color: var(--warn);
+    }
+
+    @media (max-width: 620px) {
+      .linkList,
+      .quickList,
+      .copyList {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .copyTextActions {
+        gap: 2px;
+      }
+
+      .copyTextBtn {
+        height: 42px;
+        min-height: 42px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .page {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .panel {
+        border-radius: 17px;
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .compactBrandText strong {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="copyToast" class="toast" role="status" aria-live="polite"></div>
+  <main id="page" class="page">
+    <section class="panel">
+      <div id="homeView">
+        <div class="brand">
+          <div class="logo">M</div>
+          <div>
+            <h1>Mark的小工具</h1>
+            <p class="sub">选择需要使用的工具。</p>
+          </div>
+        </div>
+        <div class="moduleGrid">
+          <button class="moduleEntry moduleEntryQuick" type="button" data-open-view="quick">
+            <span class="moduleIcon" aria-hidden="true">⧉</span>
+            <span class="moduleText">
+              <strong>一键复制</strong>
+              <span>查看手机、账号并复制字段</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
+          </button>
+          <button class="moduleEntry moduleEntryLinks" type="button" data-open-view="links">
+            <span class="moduleIcon" aria-hidden="true">↗</span>
+            <span class="moduleText">
+              <strong>挂车链接</strong>
+              <span>复制 PID 或打开商品链接</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
+          </button>
+          <button class="moduleEntry moduleEntryCopy" type="button" data-open-view="copy">
+            <span class="moduleIcon" aria-hidden="true">文</span>
+            <span class="moduleText">
+              <strong>文案复制</strong>
+              <span>选择商品并复制对应文案</span>
+            </span>
+            <span class="moduleArrow" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="quickView" hidden>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>一键复制</small>
+            </span>
+          </div>
+          <button id="quickRefreshBtn" class="refreshBtn" type="button">刷新</button>
+        </div>
+        <div id="quickList" class="quickList"></div>
+        <div id="quickStatus" class="status" role="status" aria-live="polite"></div>
+      </div>
+
+      <div id="linkView" hidden>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>挂车链接</small>
+            </span>
+          </div>
+          <button id="refreshBtn" class="refreshBtn" type="button">刷新</button>
+        </div>
+
+        <div id="linkList" class="linkList"></div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </div>
+
+      <div id="copyView" hidden>
+        <div class="compactToolbar">
+          <button class="compactBack" type="button" data-open-view="home">返回</button>
+          <div class="compactBrand">
+            <span class="miniLogo">M</span>
+            <span class="compactBrandText">
+              <strong>Mark的小工具</strong>
+              <small>文案复制</small>
+            </span>
+          </div>
+          <button id="copyRefreshBtn" class="refreshBtn" type="button">刷新</button>
+        </div>
+
+        <div id="copyList" class="copyList"></div>
+        <div id="copyStatus" class="status" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const QUICK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=2005332137&single=true&output=csv";
+    const LINK_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=1889161542&single=true&output=csv";
+    const COPY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTpepqJp8ZsCDVhDBQXaAeRxyf3XMatTImkj19AtvUTWw0EixwKehe-fV3waJzmNfTV_qKHCACJtBSk/pub?gid=648078346&single=true&output=csv";
+    const PRODUCT_URL_PREFIX = "https://shop.tiktok.com/view/product/";
+    const STORAGE_PREFIX = "mark_tools_link_only_v1_";
+
+    const state = {
+      items: [],
+      loading: false,
+      loaded: false
+    };
+
+    const quickState = {
+      items: [],
+      loading: false,
+      loaded: false
+    };
+
+    const copyState = {
+      items: [],
+      loading: false,
+      loaded: false
+    };
+
+    const els = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cacheElements();
+      bindEvents();
+      hydrateState();
+      openView("home");
+    });
+
+    function cacheElements() {
+      [
+        "copyToast",
+        "page",
+        "homeView",
+        "quickView",
+        "linkView",
+        "copyView",
+        "quickRefreshBtn",
+        "quickList",
+        "quickStatus",
+        "refreshBtn",
+        "linkList",
+        "status",
+        "copyRefreshBtn",
+        "copyList",
+        "copyStatus"
+      ].forEach((id) => { els[id] = document.getElementById(id); });
+    }
+
+    function bindEvents() {
+      document.addEventListener("click", (event) => {
+        const viewButton = event.target.closest("[data-open-view]");
+        if (viewButton) openView(viewButton.dataset.openView);
+      });
+      els.quickRefreshBtn.addEventListener("click", () => loadQuick(true));
+      els.refreshBtn.addEventListener("click", () => loadLinks(true));
+      els.copyRefreshBtn.addEventListener("click", () => loadCopy(true));
+      els.linkList.addEventListener("click", (event) => {
+        const pidButton = event.target.closest("[data-copy-pid]");
+        if (pidButton) copyPid(pidButton.dataset.copyPid);
+      });
+      els.quickList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-quick-row][data-quick-field]");
+        if (!button) return;
+        const item = quickState.items.find((currentItem) => currentItem.rowKey === button.dataset.quickRow);
+        const fieldNumber = Number(button.dataset.quickField);
+        if (item && fieldNumber >= 1 && fieldNumber <= 4) {
+          copyQuickField(item.fields[fieldNumber - 1], fieldNumber);
+        }
+      });
+      els.copyList.addEventListener("click", (event) => {
+        const pidButton = event.target.closest("[data-copy-module-pid]");
+        if (pidButton) {
+          copyModulePid(pidButton.dataset.copyModulePid);
+          return;
+        }
+        const textButton = event.target.closest("[data-copy-row][data-copy-number]");
+        if (!textButton) return;
+        const item = copyState.items.find((currentItem) => currentItem.rowKey === textButton.dataset.copyRow);
+        const copyNumber = Number(textButton.dataset.copyNumber);
+        if (item && copyNumber >= 1 && copyNumber <= 5) {
+          copyModuleText(item.copies[copyNumber - 1], copyNumber);
+        }
+      });
+    }
+
+    function openView(viewName) {
+      const isQuick = viewName === "quick";
+      const isLinks = viewName === "links";
+      const isCopy = viewName === "copy";
+      els.homeView.hidden = isQuick || isLinks || isCopy;
+      els.quickView.hidden = !isQuick;
+      els.linkView.hidden = !isLinks;
+      els.copyView.hidden = !isCopy;
+      els.page.classList.toggle("module-open", isQuick || isLinks || isCopy);
+      window.scrollTo(0, 0);
+
+      if (isQuick && !quickState.loaded && !quickState.loading) loadQuick(false);
+      if (isLinks && !state.loaded && !state.loading) loadLinks(false);
+      if (isCopy && !copyState.loaded && !copyState.loading) loadCopy(false);
+    }
+
+    function hydrateState() {
+      return undefined;
+    }
+
+    async function loadQuick(forceRefresh) {
+      quickState.loading = true;
+      renderQuick();
+      setQuickStatus(forceRefresh ? "正在刷新一键复制数据..." : "正在读取一键复制数据...", false, 0);
+
+      try {
+        quickState.items = parseQuickCsv(await fetchCsv(QUICK_CSV_URL, forceRefresh));
+        setQuickStatus("已读取 " + quickState.items.length + " 条记录。");
+      } catch (error) {
+        quickState.items = [];
+        setQuickStatus("一键复制数据读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        quickState.loading = false;
+        quickState.loaded = true;
+        renderQuick();
+      }
+    }
+
+    async function loadLinks(forceRefresh) {
+      state.loading = true;
+      renderLinks();
+      setStatus(forceRefresh ? "正在刷新挂车链接..." : "正在读取挂车链接...", false, 0);
+
+      try {
+        state.items = parseLinkCsv(await fetchCsv(LINK_CSV_URL, forceRefresh));
+        setStatus("已读取 " + state.items.length + " 个商品链接。");
+      } catch (error) {
+        state.items = [];
+        setStatus("挂车链接读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        state.loading = false;
+        state.loaded = true;
+        renderLinks();
+      }
+    }
+
+    async function loadCopy(forceRefresh) {
+      copyState.loading = true;
+      renderCopy();
+      setCopyStatus(forceRefresh ? "正在刷新文案复制数据..." : "正在读取文案复制数据...", false, 0);
+
+      try {
+        copyState.items = parseCopyCsv(await fetchCsv(COPY_CSV_URL, forceRefresh));
+        setCopyStatus("已读取 " + copyState.items.length + " 条文案记录。");
+      } catch (error) {
+        copyState.items = [];
+        setCopyStatus("文案复制数据读取失败，请检查 Google 表格发布链接。", true, 0);
+      } finally {
+        copyState.loading = false;
+        copyState.loaded = true;
+        renderCopy();
+      }
+    }
+
+    async function fetchCsv(url, forceRefresh) {
+      const finalUrl = forceRefresh ? url + (url.includes("?") ? "&" : "?") + "t=" + Date.now() : url;
+      const response = await fetch(finalUrl, { cache: "no-store" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.text();
+    }
+
+    function parseLinkCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
+      const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
+      const pidIndex = findHeader(headers, ["PID"]);
+      const linkIndex = findHeader(headers, ["挂车链接", "链接"]);
+      if (pidIndex === -1 && linkIndex === -1) {
+        throw new Error("CSV 缺少必要字段");
+      }
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const productName = nameIndex >= 0 ? cleanCell(row[nameIndex]) : "";
+        const pid = pidIndex >= 0 ? cleanPid(row[pidIndex]) : "";
+        const link = linkIndex >= 0 ? cleanCell(row[linkIndex]) : "";
+        if (!pid && !link) return result;
+        result.push({
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName,
+          pid,
+          link
+        });
+        return result;
+      }, []);
+    }
+
+    function parseQuickCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
+      const phoneIndex = findHeader(headers, ["手机", "手机号"]);
+      const accountIndex = findHeader(headers, ["账号", "账户"]);
+      const fieldIndexes = [1, 2, 3, 4].map((number) => findHeader(headers, ["复制字段" + number, "字段" + number]));
+      if (fieldIndexes.every((index) => index === -1)) {
+        throw new Error("CSV 缺少复制字段");
+      }
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const fields = fieldIndexes.map((index) => index >= 0 ? cleanCell(row[index]) : "");
+        if (!fields.some(Boolean)) return result;
+        result.push({
+          rowKey: String(rowIndex),
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          phone: phoneIndex >= 0 ? cleanCell(row[phoneIndex]) : "",
+          account: accountIndex >= 0 ? cleanCell(row[accountIndex]) : "",
+          fields
+        });
+        return result;
+      }, []);
+    }
+
+    function parseCopyCsv(csvText) {
+      const rows = parseCsv(csvText);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((cell) => cleanCell(cell));
+      const idIndex = findHeader(headers, ["序号", "编号"]);
+      const nameIndex = findHeader(headers, ["商品名称", "商品名"]);
+      const pidIndex = findHeader(headers, ["PID"]);
+      const copyIndexes = [1, 2, 3, 4, 5].map((number) => findHeader(headers, ["文案" + number]));
+      if (copyIndexes.every((index) => index === -1)) {
+        throw new Error("CSV 缺少文案字段");
+      }
+
+      return rows.slice(1).reduce((result, row, rowIndex) => {
+        const productName = nameIndex >= 0 ? cleanCell(row[nameIndex]) : "";
+        const pid = pidIndex >= 0 ? cleanPid(row[pidIndex]) : "";
+        const copies = copyIndexes.map((index) => index >= 0 ? cleanCell(row[index]) : "");
+        if (![productName, pid, ...copies].some(Boolean)) return result;
+        result.push({
+          rowKey: String(rowIndex),
+          index: idIndex >= 0 ? cleanCell(row[idIndex]) || String(rowIndex + 1) : String(rowIndex + 1),
+          productName,
+          pid,
+          copies
+        });
+        return result;
+      }, []);
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (char === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+
+        if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          rows.push(row);
+          row = [];
+          cell = "";
+          continue;
+        }
+
+        cell += char;
+      }
+
+      row.push(cell);
+      rows.push(row);
+      return rows.filter((currentRow) => currentRow.some((cellValue) => cleanCell(cellValue) !== ""));
+    }
+
+    function renderQuick() {
+      els.quickRefreshBtn.disabled = quickState.loading;
+
+      if (quickState.loading) {
+        els.quickList.innerHTML = '<div class="empty">正在读取一键复制数据...</div>';
+        return;
+      }
+
+      if (!quickState.items.length) {
+        els.quickList.innerHTML = '<div class="empty">没有读取到可复制内容，请检查 Google 表格。</div>';
+        return;
+      }
+
+      els.quickList.innerHTML = quickState.items.map((item) => {
+        const buttons = item.fields.map((value, fieldIndex) => {
+          const fieldNumber = fieldIndex + 1;
+          return '<button class="quickCopyBtn" type="button" data-quick-row="' + escapeHtml(item.rowKey) + '" data-quick-field="' + fieldNumber + '"' + (value ? "" : " disabled") + '>复制字段' + fieldNumber + '</button>';
+        }).join("");
+
+        return '<div class="productCard">' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
+          '<div class="quickMeta">' +
+          '<div><strong>手机：</strong>' + escapeHtml(item.phone || "无") + '</div>' +
+          '<div><strong>账号：</strong>' + escapeHtml(item.account || "无") + '</div>' +
+          '</div>' +
+          '<div class="quickActions">' + buttons + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
+    function renderLinks() {
+      els.refreshBtn.disabled = state.loading;
+
+      if (state.loading) {
+        els.linkList.innerHTML = '<div class="empty">正在读取挂车链接...</div>';
+        return;
+      }
+
+      if (!state.items.length) {
+        els.linkList.innerHTML = '<div class="empty">没有读取到商品链接，请检查 Google 表格。</div>';
+        return;
+      }
+
+      els.linkList.innerHTML = state.items.map((item) => {
+        const openLink = item.link
+          ? '<a class="openLinkBtn" href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener">打开链接</a>'
+          : '<a class="openLinkBtn is-disabled" aria-disabled="true">打开链接</a>';
+        return '<div class="productCard linkProductCard">' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
+          '<div class="linkDetails">' +
+          '<div><strong>商品名称：</strong>' + escapeHtml(item.productName || "无") + '</div>' +
+          '<div><strong>PID：</strong>' + escapeHtml(item.pid || "无") + '</div>' +
+          '</div>' +
+          '<div class="productActions">' +
+          '<button class="copyPidBtn" type="button" data-copy-pid="' + escapeHtml(item.pid) + '"' + (item.pid ? "" : " disabled") + '>复制PID</button>' +
+          openLink +
+          '</div>' +
+          '</div>';
+      }).join("");
+    }
+
+    function renderCopy() {
+      els.copyRefreshBtn.disabled = copyState.loading;
+
+      if (copyState.loading) {
+        els.copyList.innerHTML = '<div class="empty">正在读取文案复制数据...</div>';
+        return;
+      }
+
+      if (!copyState.items.length) {
+        els.copyList.innerHTML = '<div class="empty">没有读取到文案内容，请检查 Google 表格。</div>';
+        return;
+      }
+
+      els.copyList.innerHTML = copyState.items.map((item) => {
+        const buttons = item.copies.map((value, copyIndex) => {
+          const copyNumber = copyIndex + 1;
+          const label = "复制文案" + copyNumber;
+          return '<button class="copyTextBtn" type="button" aria-label="' + label + '" title="' + label + '" data-copy-row="' + escapeHtml(item.rowKey) + '" data-copy-number="' + copyNumber + '"' + (value ? "" : " disabled") + '>文案' + copyNumber + '</button>';
+        }).join("");
+        const pidBox = item.pid
+          ? '<div class="pidCopyBox"><a class="pidOpenArea" href="' + PRODUCT_URL_PREFIX + escapeHtml(item.pid) + '" target="_blank" rel="noopener"><strong>PID：</strong>' + escapeHtml(item.pid) + '</a><button class="pidMiniCopyBtn" type="button" data-copy-module-pid="' + escapeHtml(item.pid) + '" aria-label="复制PID" title="复制PID"><span class="pidMiniCopyIcon" aria-hidden="true"></span></button></div>'
+          : '<div class="pidCopyBox is-disabled" aria-disabled="true"><span class="pidOpenArea"><strong>PID：</strong>无</span><button class="pidMiniCopyBtn" type="button" aria-label="无PID可复制" title="无PID可复制" disabled><span class="pidMiniCopyIcon" aria-hidden="true"></span></button></div>';
+
+        return '<div class="productCard copyProductCard">' +
+          '<span class="cornerIndex">' + escapeHtml(item.index) + '</span>' +
+          '<div class="copyProductName"><strong>商品名称：</strong>' + escapeHtml(item.productName || "无") + '</div>' +
+          pidBox +
+          '<div class="copyTextActions">' + buttons + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
+    async function copyPid(pid) {
+      if (!pid) return;
+      const ok = await copyText(pid);
+      if (ok) showToast("PID 已复制");
+      setStatus(ok ? "PID 已复制。" : "自动复制失败，请手动复制 PID：" + pid, !ok);
+    }
+
+    async function copyQuickField(value, fieldNumber) {
+      if (!value) return;
+      const ok = await copyText(value);
+      if (ok) showToast("已复制字段" + fieldNumber, createCopyPreview(value), 2200);
+      setQuickStatus(ok ? "已复制字段" + fieldNumber + "。" : "自动复制失败，请长按后手动复制。", !ok);
+    }
+
+    async function copyModulePid(pid) {
+      if (!pid) return;
+      const ok = await copyText(pid);
+      if (ok) {
+        showToast("PID 已复制");
+      } else {
+        setCopyStatus("自动复制失败，请手动复制 PID：" + pid, true, 0);
+      }
+    }
+
+    async function copyModuleText(value, copyNumber) {
+      if (!value) return;
+      const ok = await copyText(value);
+      if (ok) {
+        showToast("文案" + copyNumber + " 已复制", createCopyPreview(value), 2200);
+      } else {
+        setCopyStatus("自动复制失败，请长按后手动复制。", true, 0);
+      }
+    }
+
+    function createCopyPreview(value) {
+      const normalized = cleanCell(value).replace(/\s+/g, " ");
+      return Array.from(normalized).slice(0, 40).join("") + "…";
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (error) {}
+      }
+      return fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-1000px";
+        textarea.style.left = "-1000px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return ok;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function setStatus(text, warning, duration) {
+      els.status.textContent = text || "";
+      els.status.className = warning ? "status warn" : "status";
+      clearTimeout(els.status.__timer);
+      if (text && duration !== 0) {
+        els.status.__timer = setTimeout(() => {
+          els.status.textContent = "";
+          els.status.className = "status";
+        }, duration || 1800);
+      }
+    }
+
+    function setQuickStatus(text, warning, duration) {
+      els.quickStatus.textContent = text || "";
+      els.quickStatus.className = warning ? "status warn" : "status";
+      clearTimeout(els.quickStatus.__timer);
+      if (text && duration !== 0) {
+        els.quickStatus.__timer = setTimeout(() => {
+          els.quickStatus.textContent = "";
+          els.quickStatus.className = "status";
+        }, duration || 1800);
+      }
+    }
+
+    function setCopyStatus(text, warning, duration) {
+      els.copyStatus.textContent = text || "";
+      els.copyStatus.className = warning ? "status warn" : "status";
+      clearTimeout(els.copyStatus.__timer);
+      if (text && duration !== 0) {
+        els.copyStatus.__timer = setTimeout(() => {
+          els.copyStatus.textContent = "";
+          els.copyStatus.className = "status";
+        }, duration || 1800);
+      }
+    }
+
+    function showToast(text, preview, duration) {
+      els.copyToast.textContent = "";
+      const title = document.createElement("span");
+      title.className = "toastTitle";
+      title.textContent = text;
+      els.copyToast.appendChild(title);
+      els.copyToast.classList.toggle("has-preview", Boolean(preview));
+      if (preview) {
+        const previewText = document.createElement("span");
+        previewText.className = "toastPreview";
+        previewText.textContent = preview;
+        els.copyToast.appendChild(previewText);
+      }
+      els.copyToast.classList.add("show");
+      clearTimeout(els.copyToast.__timer);
+      els.copyToast.__timer = setTimeout(() => {
+        els.copyToast.classList.remove("show");
+      }, duration || (preview ? 2200 : 1300));
+    }
+
+    function findHeader(headers, names) {
+      return headers.findIndex((header) => names.includes(header));
+    }
+
+    function cleanCell(value) {
+      return String(value || "").trim();
+    }
+
+    function cleanPid(value) {
+      return cleanCell(value).replace(/\D/g, "");
+    }
+
+    function isEmptyRow(row) {
+      return row.every((cell) => cleanCell(cell) === "");
+    }
+
+    function save(key, value) {
+      localStorage.setItem(STORAGE_PREFIX + key, typeof value === "string" ? value : JSON.stringify(value));
+    }
+
+    function readText(key, fallback) {
+      return localStorage.getItem(STORAGE_PREFIX + key) || fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
